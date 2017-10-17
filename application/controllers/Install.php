@@ -103,7 +103,7 @@ class Install extends CI_Controller
 				'finish_time'   => array('type' => $DATETIME),
 				'extra_time'    => array('type' => 'INT', 'constraint' => 11),
 				'late_rule'     => array('type' => 'TEXT'),
-				'participants'  => array('type' => 'TEXT', 'default' => ''),
+				'participants'  => array('type' => 'TEXT'),
 				'moss_update'   => array('type' => 'VARCHAR', 'constraint' => 30, 'default' => 'Never'),
 			);
 			$this->dbforge->add_field($fields);
@@ -137,7 +137,7 @@ class Install extends CI_Controller
 				'python_time_limit' => array('type' => 'INT', 'constraint' => 11, 'unsigned' => TRUE, 'default' => 1500),
 				'java_time_limit'   => array('type' => 'INT', 'constraint' => 11, 'unsigned' => TRUE, 'default' => 2000),
 				'memory_limit'      => array('type' => 'INT', 'constraint' => 11, 'unsigned' => TRUE, 'default' => 50000),
-				'allowed_languages' => array('type' => 'TEXT', 'default' => ''),
+				'allowed_languages' => array('type' => 'TEXT'),
 				'diff_cmd'          => array('type' => 'VARCHAR', 'constraint' => 20, 'default' => 'diff'),
 				'diff_arg'          => array('type' => 'VARCHAR', 'constraint' => 20, 'default' => '-bB'),
 			);
