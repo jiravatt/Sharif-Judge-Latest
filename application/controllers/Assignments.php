@@ -51,6 +51,7 @@ class Assignments extends CI_Controller
 			ob_end_clean();
 			$item['coefficient'] = $coefficient;
 			$item['finished'] = ($delay > $extra_time);
+//			$item['is_participate'] = $this->assignment_model->is_participant($item['participants'],$this->user->username);
 		}
 
 		$this->twig->display('pages/assignments.twig', $data);
@@ -301,13 +302,13 @@ class Assignments extends CI_Controller
 				$data['problems'] = array(
 					array(
 						'id' => 1,
-						'name' => 'Problem ',
+						'name' => '',
 						'score' => 100,
 						'c_time_limit' => 500,
-						'python_time_limit' => 1500,
+						'python_time_limit' => 1000,
 						'java_time_limit' => 2000,
-						'memory_limit' => 50000,
-						'allowed_languages' => 'C,C++,Python 2,Python 3,Java',
+						'memory_limit' => 20480,
+						'allowed_languages' => 'Python 3,C++',
 						'diff_cmd' => 'diff',
 						'diff_arg' => '-bB',
 						'is_upload_only' => 0
