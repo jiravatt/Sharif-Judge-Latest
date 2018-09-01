@@ -97,8 +97,10 @@ class Assignment_model extends CI_Model
 					$item = 'Python 3';
 				elseif ($item2 === 'pdf')
 					$item = 'PDF';
+			//	elseif ($item2 === 'flowgorithm')
+			//		$item = 'Flowgorithm';
 				$item2 = strtolower($item);
-				if ( ! in_array($item2, array('c','c++','python 2','python 3','java','zip','pdf')))
+				if ( ! in_array($item2, array('c','c++','python 2','python 3','java','zip','pdf','flowgorithm')))
 					continue;
 				// If the problem is not Upload-Only, its language should be one of {C,C++,Python 2, Python 3,Java}
 				if ( ! in_array($i, $uo) && ! in_array($item2, array('c','c++','python 2','python 3','java')) )
@@ -175,7 +177,7 @@ class Assignment_model extends CI_Model
 	/**
 	 * All Assignments
 	 *
-	 * Returns a list of all assignments and their information
+	 * Returns a list of all "user-involved" assignments and their information
 	 *
 	 * @return mixed
 	 */
@@ -185,7 +187,10 @@ class Assignment_model extends CI_Model
 		$assignments = array();
 		foreach ($result as $item)
 		{
-			$assignments[$item['id']] = $item;
+//			$item['is_current_user_participate'] = $this->assignment_model->is_participant($item['participants'],$this->user->username);
+			if ( ($this->user->level > 0) || $this->assignment_model->is_participant($item['participants'],$this->user->username) )
+				$assignments[$item['id']] = $item;
+
 		}
 		return $assignments;
 	}
