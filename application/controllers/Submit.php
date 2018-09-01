@@ -58,6 +58,7 @@ class Submit extends CI_Controller
 			case 'java': return 'java';
 			case 'zip': return 'zip';
 			case 'pdf': return 'pdf';
+			case 'flowgorithm': return 'fprg'; // Flowgorithm file
 			default: return FALSE;
 		}
 	}
@@ -76,6 +77,7 @@ class Submit extends CI_Controller
 			case 'java': return ($extension==='java'?TRUE:FALSE);
 			case 'zip': return ($extension==='zip'?TRUE:FALSE);
 			case 'pdf': return ($extension==='pdf'?TRUE:FALSE);
+			case 'fprg': return ($extension==='fprg'?TRUE:FLASE); // Flowgorithm file
 		}
 	}
 
@@ -87,7 +89,7 @@ class Submit extends CI_Controller
 	{
 		if ($str=='0')
 			return FALSE;
-		if (in_array( strtolower($str),array('c', 'c++', 'python 2', 'python 3', 'java', 'zip', 'pdf')))
+		if (in_array( strtolower($str),array('c', 'c++', 'python 2', 'python 3', 'java', 'zip', 'pdf', 'flowgorithm')))
 			return TRUE;
 		return FALSE;
 	}
@@ -131,8 +133,7 @@ class Submit extends CI_Controller
 		}
 		if ($this->user->selected_assignment['id'] == 0)
 			$this->data['error']='Please select an assignment first.';
-		elseif ($this->user->level == 0 && ! $this->user->selected_assignment['open'])
-			// if assignment is closed, non-student users (admin, instructors) still can submit
+		elseif (! $this->user->selected_assignment['open'])
 			$this->data['error'] = 'Selected assignment is closed.';
 		elseif (shj_now() < strtotime($this->user->selected_assignment['start_time']))
 			$this->data['error'] = 'Selected assignment has not started.';
@@ -141,6 +142,9 @@ class Submit extends CI_Controller
 		elseif ( ! $this->assignment_model->is_participant($this->user->selected_assignment['participants'],$this->user->username) )
 			$this->data['error'] = 'You are not registered for submitting.';
 		else
+			$this->data['error'] = 'none';
+
+		if ($this->user->level > 0)
 			$this->data['error'] = 'none';
 
 		$this->twig->display('pages/submit.twig', $this->data);
@@ -170,11 +174,11 @@ class Submit extends CI_Controller
 			show_error('You have already submitted for this problem. Your last submission is still in queue.');
 		if ($this->user->level==0 && !$this->user->selected_assignment['open'])
 			show_error('Selected assignment has been closed.');
-		if ($now < strtotime($this->user->selected_assignment['start_time']))
+		if ($this->user->level==0 && $now < strtotime($this->user->selected_assignment['start_time']))
 			show_error('Selected assignment has not started.');
-		if ($now > strtotime($this->user->selected_assignment['finish_time'])+$this->user->selected_assignment['extra_time'])
+		if ($this->user->level==0 && $now > strtotime($this->user->selected_assignment['finish_time'])+$this->user->selected_assignment['extra_time'])
 			show_error('Selected assignment has finished.');
-		if ( ! $this->assignment_model->is_participant($this->user->selected_assignment['participants'],$this->user->username) )
+		if ($this->user->level==0 &&  ! $this->assignment_model->is_participant($this->user->selected_assignment['participants'],$this->user->username) )
 			show_error('You are not registered for submitting.');
 		$filetypes = explode(",",$this->problem['allowed_languages']);
 		foreach ($filetypes as &$filetype)
