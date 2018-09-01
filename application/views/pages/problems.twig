@@ -6,8 +6,8 @@
 {% set selected = 'problems' %}
 {% extends 'templates/base.twig' %}
 {% block icon %}fa-puzzle-piece{% endblock %}
-{% block title %}{{ all_problems[problem.id].name }}{% endblock %}
-{% block head_title %}{{ all_problems[problem.id].name }}{% endblock %}
+{% block title %}{% if can_view %}{{ all_problems[problem.id].name }}{% else %}Problems{% endif %}{% endblock %}
+{% block head_title %}{% if can_view %}{{ all_problems[problem.id].name }}{% else %}Problems{% endif %}{% endblock %}
 
 
 
@@ -39,7 +39,6 @@ $(document).ready(function(){
 {% endblock %}
 
 
-
 {% block title_menu %}
 {% if user.level >= 2 %}
 <span class="title_menu_item"><a href="{{ site_url("problems/edit/md/#{description_assignment.id}/#{problem.id}") }}"><i class="fa fa-pencil color2"></i> Edit Markdown</a></span>
@@ -54,9 +53,11 @@ $(document).ready(function(){
 
 
 {% block main_content %}
+{% if can_view %}
 <div class="problem_description">
 	{{ problem.description|raw }}
 </div>
+
 
 <div id="right_sidebar">
 
@@ -114,4 +115,9 @@ $(document).ready(function(){
 	{% endif %}
 
 </div>
-{% endblock %}  {# main_content #}
+{% else %}
+	<p>{{ error_txt }}</p>
+{% endif %}
+{% endblock %}
+
+{# main_content #}
