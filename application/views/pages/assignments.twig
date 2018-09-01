@@ -36,10 +36,10 @@
 	<th>Name</th>
 	<th>Problems</th>
 	<th>Submissions</th>
-	<th>Coefficient</th>
 	<th>Start Time</th>
 	<th>Finish Time</th>
 	<th>Status</th>
+	<th>Coefficient</th>
 	<th>PDF</th>
 	{% if user.level > 0 %}
 	<th>Actions</th>
@@ -47,18 +47,19 @@
 </tr>
 </thead>
 {% for item in all_assignments|reverse %}
+{# if item.is_current_user_participate or user.level >= 1 #}
 <tr>
 	<td><i class="pointer select_assignment fa {{ item.id == user.selected_assignment.id ? 'fa-check-square-o color6' : 'fa-square-o' }} fa-2x" data-id="{{ item.id }}"></i></td>
-	<td dir="auto">{{ item.name }}</td>
-	<td><a href="{{ site_url('problems/'~item.id) }}">{{ item.problems }} problem{{ item.problems != 1 ? 's' }}</a></td>
+	<td style="text-align:left;"><a href="{{ site_url('problems/'~item.id) }}">{{ item.name }}</a></td>
+	<td>{{ item.problems }} problem{{ item.problems != 1 ? 's' }}</td>
 	<td>{{ item.total_submits }} submission{{ item.total_submits != 1 ? 's' }}</td>
-	<td>
+{#	<td>
 		{% if item.finished %}
 			<span style="color: red;">Finished</span>
 		{% else %}
 			{{ item.coefficient }} %
 		{% endif %}
-	</td>
+	</td> #}
 	<td>{{ item.start_time }}</td>
 	<td>{{ item.finish_time }}</td>
 	<td>
@@ -68,6 +69,13 @@
 			<span style="color: red;">Close</span>
 		{% endif %}
 	</td>
+	<td>
+            {% if item.finished %}
+                        <span style="color: red;">Finished</span>
+                {% else %}
+                        {{ item.coefficient }} %
+                {% endif %}
+        </td>
 	<td>
 		<a href="{{ site_url('assignments/pdf/'~item.id) }}"><img src="{{ base_url('assets/images/pdf.svg') }}" /></a>
 	</td>
@@ -92,6 +100,7 @@
 	</td>
 	{% endif %}
 </tr>
+{# endif #}
 {% endfor %}
 </table>
 {% endif %}
