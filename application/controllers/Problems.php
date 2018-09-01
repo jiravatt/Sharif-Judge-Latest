@@ -50,6 +50,8 @@ class Problems extends CI_Controller
 			'all_problems' => $this->assignment_model->all_problems($assignment_id),
 			'description_assignment' => $assignment,
 			'can_submit' => TRUE,
+			'can_view' => TRUE,
+			'error_txt' => '',
 		);
 
 		if ( ! is_numeric($problem_id) || $problem_id < 1 || $problem_id > $data['description_assignment']['problems'])
@@ -71,12 +73,32 @@ class Problems extends CI_Controller
 			$data['problem']['description'] = file_get_contents($path);
 
 		if ( $assignment['id'] == 0
-			OR ( $this->user->level == 0 && ! $assignment['open'] )
+			OR ! $assignment['open']
 			OR shj_now() < strtotime($assignment['start_time'])
 			OR shj_now() > strtotime($assignment['finish_time'])+$assignment['extra_time'] // deadline = finish_time + extra_time
 			OR ! $this->assignment_model->is_participant($assignment['participants'], $this->user->username)
 		)
 			$data['can_submit'] = FALSE;
+
+		if ( $this->user->level > 0 )
+			$data['can_submit'] = TRUE;
+
+		if ( $assignment['id'] == 0 ) {
+			$data['can_view'] = FALSE;
+			$data['error_txt'] = 'Please select an assignment first.';
+		} else if ( ! $this->assignment_model->is_participant($assignment['participants'], $this->user->username) ) {
+			$data['can_view'] = FALSE;
+			$data['error_txt'] = 'You are not registered for this assignment.';
+		} else if ( ! $assignment['open'] ) {
+			$data['can_view'] = FALSE;
+			$data['error_txt'] = 'This assignment has been closed.';
+		} else if ( shj_now() < strtotime($assignment['start_time']) ) {
+			$data['can_view'] = FALSE;
+			$data['error_txt'] = 'Please wait until this assignment starts.';
+		}
+
+		if ( $this->user->level > 0 )
+			$data['can_view'] = TRUE;
 
 		$this->twig->display('pages/problems.twig', $data);
 	}
