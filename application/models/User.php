@@ -41,13 +41,14 @@ class User extends CI_Model
 		else
 			$this->selected_assignment = $query->row_array();
 
-		switch ($user->role)
-		{
-			case 'admin': $this->level = 3; break;
-			case 'head_instructor': $this->level = 2; break;
-			case 'instructor': $this->level = 1; break;
-			case 'student': $this->level = 0; break;
-		}
+		$this->level = $this->get_user_level($this->username);
+//		switch ($user->role)
+//		{
+//			case 'admin': $this->level = 3; break;
+//			case 'head_instructor': $this->level = 2; break;
+//			case 'instructor': $this->level = 1; break;
+//			case 'student': $this->level = 0; break;
+//		}
 	}
 
 
@@ -105,6 +106,32 @@ class User extends CI_Model
 			->dashboard_widget_positions,
 			TRUE
 		);
+	}
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Get level of given user
+	 *
+	 * Return level of user from database
+	 *
+	 * @param $username
+	 * @return $user.level
+	 */
+	public function get_user_level($username)
+	{
+		$user = $this->db
+			->select('role')
+			->get_where('users', array('username' => $username))
+			->row();
+
+		switch ($user->role)
+		{
+			case 'admin': return 3;
+			case 'head_instructor': return 2;
+			case 'instructor': return 1;
+			case 'student': return 0;
+		}
 	}
 
 }
