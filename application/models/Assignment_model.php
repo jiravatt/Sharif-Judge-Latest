@@ -187,9 +187,18 @@ class Assignment_model extends CI_Model
 		$assignments = array();
 		foreach ($result as $item)
 		{
-//			$item['is_current_user_participate'] = $this->assignment_model->is_participant($item['participants'],$this->user->username);
+			// For student, return only their own number of submissions
+			if ( $this->user->level == 0 )
+			{
+				$user_submission = $this->db->select('submit_id')->get_where('submissions', array('username' => $this->user->username, 'assignment' => $item['id']))->row();
+				$item['total_submits'] = (int) $user_submission->num_rows;
+			}
+
+			// For student, return only participated assignments
 			if ( ($this->user->level > 0) || $this->assignment_model->is_participant($item['participants'],$this->user->username) )
+			{
 				$assignments[$item['id']] = $item;
+			}
 
 		}
 		return $assignments;
