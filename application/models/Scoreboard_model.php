@@ -36,6 +36,9 @@ class Scoreboard_model extends CI_Model
 		$scores = array();
 		foreach ($submissions as $submission){
 
+			if($this->user->get_user_level($submission['username']) > 0)
+				continue;
+
 			$pi = $this->assignment_model->problem_info($assignment_id, $submission['problem']);
 
 			$pre_score = ceil($submission['pre_score']*$pi['score']/10000);
@@ -127,10 +130,10 @@ class Scoreboard_model extends CI_Model
 	public function update_scoreboard($assignment_id)
 	{
 
-		// If scoreboard in not enabled, do nothing
-		$scoreboard_enabled = $this->db->select('scoreboard')->get_where('assignments', array('id'=>$assignment_id))->row()->scoreboard;
-		if ($assignment_id == 0 OR  ! $scoreboard_enabled )
-			return;
+//		// If scoreboard in not enabled, do nothing
+//		$scoreboard_enabled = $this->db->select('scoreboard')->get_where('assignments', array('id'=>$assignment_id))->row()->scoreboard;
+//		if ($assignment_id == 0 OR  ! $scoreboard_enabled )
+//			return;
 
 		// Generate the scoreboard
 		list ($scores, $scoreboard) = $this->_generate_scoreboard($assignment_id);
