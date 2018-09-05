@@ -133,19 +133,19 @@ class Submit extends CI_Controller
 		}
 		if ($this->user->selected_assignment['id'] == 0)
 			$this->data['error']='Please select an assignment first.';
-		elseif (! $this->user->selected_assignment['open'])
+		elseif ($this->user->level==0 && ! $this->user->selected_assignment['open'])
 			$this->data['error'] = 'Selected assignment is closed.';
-		elseif (shj_now() < strtotime($this->user->selected_assignment['start_time']))
+		elseif ($this->user->level==0 && shj_now() < strtotime($this->user->selected_assignment['start_time']))
 			$this->data['error'] = 'Selected assignment has not started.';
-		elseif (shj_now() > strtotime($this->user->selected_assignment['finish_time'])+$this->user->selected_assignment['extra_time']) // deadline = finish_time + extra_time
+		elseif ($this->user->level==0 && shj_now() > strtotime($this->user->selected_assignment['finish_time'])+$this->user->selected_assignment['extra_time']) // deadline = finish_time + extra_time
 			$this->data['error'] = 'Selected assignment has finished.';
-		elseif ( ! $this->assignment_model->is_participant($this->user->selected_assignment['participants'],$this->user->username) )
+		elseif ($this->user->level==0 &&  ! $this->assignment_model->is_participant($this->user->selected_assignment['participants'],$this->user->username) )
 			$this->data['error'] = 'You are not registered for submitting.';
 		else
 			$this->data['error'] = 'none';
 
-		if ($this->user->level > 0)
-			$this->data['error'] = 'none';
+//		if ($this->user->level > 0)
+//			$this->data['error'] = 'none';
 
 		$this->twig->display('pages/submit.twig', $this->data);
 
