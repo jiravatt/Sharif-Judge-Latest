@@ -158,7 +158,7 @@
 				{% endif %}
 			</td>
 			<td>
-				{% if submission.file_type == 'zip' or submission.file_type == 'pdf' %}
+				{% if submission.file_type == 'zip' or submission.file_type == 'pdf' or submission.file_type == 'fprg' %}
 					<div class="btn shj-orange" data-type="download">Download</div>
 				{% else %}
 					<div class="btn shj-orange" data-type="code" >Code</div>
