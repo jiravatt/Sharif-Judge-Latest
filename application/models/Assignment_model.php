@@ -44,6 +44,7 @@ class Assignment_model extends CI_Model
 			'problems' => $this->input->post('number_of_problems'),
 			'total_submits' => 0,
 			'open' => ($this->input->post('open')===NULL?0:1),
+			'hide_before_start' => ($this->input->post('hide_before_start')===NULL?0:1),
 			'scoreboard' => ($this->input->post('scoreboard')===NULL?0:1),
 			'javaexceptions' => ($this->input->post('javaexceptions')===NULL?0:1),
 			'description' => '', /* todo */
@@ -187,18 +188,35 @@ class Assignment_model extends CI_Model
 		$assignments = array();
 		foreach ($result as $item)
 		{
-			// For student, return only their own number of submissions
+			// For students
 			if ( $this->user->level == 0 )
 			{
+				// return only their own number of submissions
 				$user_submission = $this->db->select('submit_id')->get_where('submissions', array('username' => $this->user->username, 'assignment' => $item['id']))->row();
 				$item['total_submits'] = (int) $user_submission->num_rows;
 			}
 
-			// For student, return only participated assignments
-			if ( ($this->user->level > 0) || $this->assignment_model->is_participant($item['participants'],$this->user->username) )
+			// For students and teachers
+			if ( $this->user->level < 2 )
+			{
+				// Do not return hide-before-start assignments before start time AND return only participated assignments
+				if ( $this->assignment_model->is_participant($item['participants'],$this->user->username) )
+				{
+					if ( ($item['hide_before_start'] == 1 && shj_now() >= strtotime($item['start_time']))
+					     OR ($item['hide_before_start'] == 0) )
+						$assignments[$item['id']] = $item;
+				}
+			}
+			else
 			{
 				$assignments[$item['id']] = $item;
 			}
+
+			// For student, return only participated assignments
+//			if ( ($this->user->level > 0) || $this->assignment_model->is_participant($item['participants'],$this->user->username) )
+//			{
+//				$assignments[$item['id']] = $item;
+//			}
 
 		}
 		return $assignments;
