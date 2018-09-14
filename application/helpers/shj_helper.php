@@ -81,6 +81,7 @@ if ( ! function_exists('filetype_to_extension'))
 			case 'java': return 'java';
 			case 'zip': return 'zip';
 			case 'pdf': return 'pdf';
+			case 'fprg': return 'fprg'; // Flowgorithm file
 			default: return FALSE;
 		}
 	}
@@ -104,6 +105,7 @@ if ( ! function_exists('filetype_to_language'))
 			case 'java': return 'Java';
 			case 'zip': return 'Zip';
 			case 'pdf': return 'PDF';
+			case 'fprg': return 'Flow'; //Flowgorithm file
 			default: return FALSE;
 		}
 	}
