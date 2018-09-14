@@ -20,6 +20,8 @@ class Assignments extends CI_Controller
 	public function __construct()
 	{
 		parent::__construct();
+		if ( ! $this->db->table_exists('sessions'))
+			redirect('install');
 		if ( ! $this->session->userdata('logged_in')) // if not logged in
 			redirect('login');
 
