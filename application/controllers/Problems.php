@@ -62,13 +62,16 @@ class Problems extends CI_Controller
 			$data['error_txt'] = 'Problem does not exist.';
 		} else if ( ($this->user->level == 0) && ! ($this->assignment_model->is_participant($assignment['participants'], $this->user->username)) ) {
 			$data['can_view'] = FALSE;
-			$data['error_txt'] = 'You are not registered for this assignment.';
+			$data['error_txt'] = 'Problem does not exist.';
+		} else if ( ($this->user->level == 0) && shj_now() < strtotime($assignment['start_time']) ) {
+			if ( $assignment['hide_before_start'] == 1 )
+				$data['error_txt'] = 'Problem does not exist.';
+			else
+				$data['error_txt'] = 'Please wait until this assignment starts.';
+			$data['can_view'] = FALSE;
 		} else if ( ($this->user->level == 0) && ! ($assignment['open']) ) {
 			$data['can_view'] = FALSE;
 			$data['error_txt'] = 'This assignment has been closed.';
-		} else if ( ($this->user->level == 0) && shj_now() < strtotime($assignment['start_time']) ) {
-			$data['can_view'] = FALSE;
-			$data['error_txt'] = 'Please wait until this assignment starts.';
 		} else if ( $problem_id > $data['description_assignment']['problems'] ) {
 			$data['can_view'] = FALSE;
 			$data['error_txt'] = 'Problem does not exist.';
