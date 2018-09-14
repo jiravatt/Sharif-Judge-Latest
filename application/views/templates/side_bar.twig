@@ -5,12 +5,12 @@
  #}
 <div id="side_bar" class="sidebar_open">
 	<ul>
-		<li class="color-dashboard{{ selected=='dashboard' ? ' selected' }}">
-			<a href="{{ site_url('dashboard') }}">
-				<i class="fa fa-dashboard fa-lg"></i>
-				<span class="sidebar_text">Dashboard</span>
-			</a>
-		</li>
+{#		<li class="color-dashboard{{ selected=='dashboard' ? ' selected' }}">
+ #			<a href="{{ site_url('dashboard') }}">
+ #				<i class="fa fa-dashboard fa-lg"></i>
+ #				<span class="sidebar_text">Dashboard</span>
+ #			</a>
+ #}		</li>
 		{% if user.level == 3 %}
 		<li class="color-settings{{ selected=='settings' ? ' selected' }}">
 			<a href="{{ site_url('settings') }}">
