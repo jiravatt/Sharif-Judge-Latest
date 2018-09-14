@@ -91,20 +91,21 @@ class Install extends CI_Controller
 
 			// create table 'assignments'
 			$fields = array(
-				'id'            => array('type' => 'INT', 'constraint' => 11, 'unsigned' => TRUE, 'auto_increment' => TRUE),
-				'name'          => array('type' => 'VARCHAR', 'constraint' => 50, 'default' => ''),
-				'problems'      => array('type' => 'SMALLINT', 'constraint' => 4, 'unsigned' => TRUE),
-				'total_submits' => array('type' => 'INT', 'constraint' => 11, 'unsigned' => TRUE),
-				'open'          => array('type' => 'TINYINT', 'constraint' => 1),
-				'scoreboard'    => array('type' => 'TINYINT', 'constraint' => 1),
-				'javaexceptions'=> array('type' => 'TINYINT', 'constraint' => 1),
-				'description'   => array('type' => 'TEXT'),
-				'start_time'    => array('type' => $DATETIME),
-				'finish_time'   => array('type' => $DATETIME),
-				'extra_time'    => array('type' => 'INT', 'constraint' => 11),
-				'late_rule'     => array('type' => 'TEXT'),
-				'participants'  => array('type' => 'TEXT'),
-				'moss_update'   => array('type' => 'VARCHAR', 'constraint' => 30, 'default' => 'Never'),
+				'id'               => array('type' => 'INT', 'constraint' => 11, 'unsigned' => TRUE, 'auto_increment' => TRUE),
+				'name'             => array('type' => 'VARCHAR', 'constraint' => 50, 'default' => ''),
+				'problems'         => array('type' => 'SMALLINT', 'constraint' => 4, 'unsigned' => TRUE),
+				'total_submits'    => array('type' => 'INT', 'constraint' => 11, 'unsigned' => TRUE),
+				'open'             => array('type' => 'TINYINT', 'constraint' => 1),
+				'hide_before_start'=> array('type' => 'TINYINT', 'constraint' => 1),
+				'scoreboard'       => array('type' => 'TINYINT', 'constraint' => 1),
+				'javaexceptions'   => array('type' => 'TINYINT', 'constraint' => 1),
+				'description'      => array('type' => 'TEXT'),
+				'start_time'       => array('type' => $DATETIME),
+				'finish_time'      => array('type' => $DATETIME),
+				'extra_time'       => array('type' => 'INT', 'constraint' => 11),
+				'late_rule'        => array('type' => 'TEXT'),
+				'participants'     => array('type' => 'TEXT'),
+				'moss_update'      => array('type' => 'VARCHAR', 'constraint' => 30, 'default' => 'Never'),
 			);
 			$this->dbforge->add_field($fields);
 			$this->dbforge->add_key('id', TRUE); // PRIMARY KEY
