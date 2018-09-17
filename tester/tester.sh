@@ -258,6 +258,12 @@ fi
 
 if [ "$EXT" = "py3" ]; then
 	cp $PROBLEMPATH/$UN/$FILENAME.py $FILENAME.py
+	# If mainprog.py exists, copy it to code.py and append content of user's written code
+	# or function to code.c
+	if [ -f "$PROBLEMPATH/mainprog.py" ]; then
+		shj_log "mainprog.py found! user's code has been appended."
+		cat $PROBLEMPATH/mainprog.py >> $FILENAME.py
+	fi
 	shj_log "Checking Python Syntax"
 	python3 -O -m py_compile $FILENAME.py >/dev/null 2>cerr
 	EXITCODE=$?
@@ -291,9 +297,22 @@ if [ "$EXT" = "c" ] || [ "$EXT" = "cpp" ]; then
 	COMPILER="gcc"
 	if [ "$EXT" = "cpp" ]; then
 		COMPILER="g++"
+		C_OPTIONS="$C_OPTIONS -std=c++14" # Use C++ 2014 Standard
 	fi
 	EXEFILE="s_$(echo $FILENAME | sed 's/[^a-zA-Z0-9]//g')" # Name of executable file
-	cp $PROBLEMPATH/$UN/$FILENAME.$EXT code.c
+	# If mainprog.c or mainprog.cpp exists, copy it to code.c and append content of user's written code
+	# or function to code.c
+	if [ "$EXT" = "c" ] && [ -f "$PROBLEMPATH/mainprog.c" ]; then
+		shj_log "mainprog.c found! user's code has been appended."
+		cp $PROBLEMPATH/mainprog.c code.c
+		cat $PROBLEMPATH/$UN/$FILENAME.$EXT >> code.c
+	elif [ "$EXT" = "cpp" ] && [ -f "$PROBLEMPATH/mainprog.cpp" ]; then
+		shj_log "mainprog.cpp found! user's code has been appended."
+		cp $PROBLEMPATH/mainprog.cpp code.c
+		cat $PROBLEMPATH/$UN/$FILENAME.$EXT >> code.c
+	else
+		cp $PROBLEMPATH/$UN/$FILENAME.$EXT code.c
+	fi
 	shj_log "Compiling as $EXT"
 	if $SANDBOX_ON; then
 		shj_log "Enabling EasySandbox"
