@@ -47,12 +47,24 @@ class Problems extends CI_Controller
 
 		$data = array(
 			'all_assignments' => $this->all_assignments,
-			'all_problems' => $this->assignment_model->all_problems($assignment_id),
+			'all_problems' => $this->assignment_model->all_problems($assignment_id, 0, true),
 			'description_assignment' => $assignment,
 			'can_submit' => TRUE,
 			'can_view' => TRUE,
 			'error_txt' => '',
 		);
+		
+		// LEVEL mode
+		if ($assignment['level_mode'] == 1 && $this->user->level < 2)
+		{
+		    $level = $this->assignment_model->get_current_level($assignment_id, $this->user->username);
+		    $data['user_problems'] = $this->assignment_model->all_problems($assignment_id, $level);
+		}
+		else
+		{
+		    $level = 0;
+		    $data['user_problems'] = $this->assignment_model->all_problems($assignment_id, 0, true);
+		}
 
 		if ( ! is_numeric($problem_id) || $problem_id < 1)
 			show_404();
@@ -75,6 +87,9 @@ class Problems extends CI_Controller
 		} else if ( $problem_id > $data['description_assignment']['problems'] ) {
 			$data['can_view'] = FALSE;
 			$data['error_txt'] = 'Problem does not exist.';
+		} else if ( ($this->user->level < 2) && $assignment['level_mode'] == 1 && $data['all_problems'][$problem_id]['level'] > $level) {
+		    $data['can_view'] = FALSE;
+			$data['error_txt'] = 'Problem does not exist.';
 		}
 
 		if ( $assignment['id'] == 0
@@ -90,7 +105,7 @@ class Problems extends CI_Controller
 
 		if ( $data['can_view'] == TRUE )
 		{
-			$languages = explode(',',$data['all_problems'][$problem_id]['allowed_languages']);
+			$languages = explode(',',$data['user_problems'][$problem_id]['allowed_languages']);
 
 			$assignments_root = rtrim($this->settings_model->get_setting('assignments_root'),'/');
 			$problem_dir = "$assignments_root/assignment_{$assignment_id}/p{$problem_id}";
