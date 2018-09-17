@@ -23,6 +23,7 @@
 	shj.num_of_problems={{ problems|length }};
 	shj.row='<tr><td>PID</td>\
 	<td><input type="text" name="name[]" class="sharif_input short" value=""/></td>\
+	<td><input type="text" name="level[]" class="sharif_input tiny2" value="0"/></td>\
 	<td><input type="text" name="score[]" class="sharif_input tiny2" value="100"/></td>\
 	<td><input type="text" name="c_time_limit[]" class="sharif_input tiny2" value="500"/></td>\
 	<td><input type="text" name="python_time_limit[]" class="sharif_input tiny2" value="1500"/></td>\
@@ -148,6 +149,12 @@
 		{# form_error('hide', '<div class="shj_error">', '</div>') #}
 	</p>
 	<p class="input_p">
+		<input id="form_a_level" type="checkbox" name="level_mode" value="1" {{ edit ? (edit_assignment.level_mode ? 'checked') : set_checkbox('level_mode', '1')|raw }} />
+		<label for="form_a_level" class="default">LEVEL mode</label>
+		<span class="form_comment space-left">Show next problem only when current problem is completed</span>
+		{# form_error('hide', '<div class="shj_error">', '</div>') #}
+	</p>
+	<p class="input_p">
 		<input id="form_a_scoreboard" type="checkbox" name="scoreboard" value="1" {{ edit ? (edit_assignment.scoreboard ? 'checked') : set_checkbox('scoreboard', '1')|raw }} />
 		<label for="form_a_scoreboard" class="default">Scoreboard</label>
 		<span class="form_comment space-left">Check this to enable scoreboard</span>
@@ -172,6 +179,7 @@
 	<tr>
 		<th rowspan="2"></th>
 		<th rowspan="2">Name</th>
+		<th rowspan="2">LEVEL</th>
 		<th rowspan="2">Score</th>
 		<th colspan="3" style="border-bottom: 1px solid #BDBDBD">Time Limit (ms)</th>
 		<th rowspan="2">Memory<br>Limit (kB)</th>
@@ -190,6 +198,7 @@
 		<tr>
 			<td>{{ problem.id }}</td>
 			<td><input type="text" name="name[]" class="sharif_input short" value="{{ problem.name }}"/></td>
+			<td><input type="text" name="level[]" class="sharif_input tiny2" value="{{ problem.level }}"/></td>
 			<td><input type="text" name="score[]" class="sharif_input tiny2" value="{{ problem.score }}"/></td>
 			<td><input type="text" name="c_time_limit[]" class="sharif_input tiny2" value="{{ problem.c_time_limit }}"/></td>
 			<td><input type="text" name="python_time_limit[]" class="sharif_input tiny2" value="{{ problem.python_time_limit }}"/></td>
@@ -206,6 +215,7 @@
 </table>
 </p>
 {{ form_error('name[]', '<div class="shj_error">', '</div>') }}
+{{ form_error('level[]', '<div class="shj_error">', '</div>') }}
 {{ form_error('score[]', '<div class="shj_error">', '</div>') }}
 {{ form_error('c_time_limit[]', '<div class="shj_error">', '</div>') }}
 {{ form_error('python_time_limit[]', '<div class="shj_error">', '</div>') }}
