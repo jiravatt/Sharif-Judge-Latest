@@ -45,6 +45,7 @@ class Assignment_model extends CI_Model
 			'total_submits' => 0,
 			'open' => ($this->input->post('open')===NULL?0:1),
 			'hide_before_start' => ($this->input->post('hide_before_start')===NULL?0:1),
+			'level_mode' => ($this->input->post('level_mode')===NULL?0:1),
 			'scoreboard' => ($this->input->post('scoreboard')===NULL?0:1),
 			'javaexceptions' => ($this->input->post('javaexceptions')===NULL?0:1),
 			'description' => '', /* todo */
@@ -73,6 +74,7 @@ class Assignment_model extends CI_Model
 
 		//Now add new problems:
 		$names = $this->input->post('name');
+		$level = $this->input->post('level');
 		$scores = $this->input->post('score');
 		$c_tl = $this->input->post('c_time_limit');
 		$py_tl = $this->input->post('python_time_limit');
@@ -113,6 +115,7 @@ class Assignment_model extends CI_Model
 				'assignment' => $id,
 				'id' => $i,
 				'name' => $names[$i-1],
+				'level' => $level[$i-1],
 				'score' => $scores[$i-1],
 				'is_upload_only' => in_array($i,$uo)?1:0,
 				'c_time_limit' => $c_tl[$i-1],
@@ -261,12 +264,13 @@ class Assignment_model extends CI_Model
 	 * @param $assignment_id
 	 * @return mixed
 	 */
-	public function all_problems($assignment_id)
+	public function all_problems($assignment_id, $level = 0, $view_all = false)
 	{
 		$result = $this->db->order_by('id')->get_where('problems', array('assignment'=>$assignment_id))->result_array();
 		$problems = array();
 		foreach ($result as $row)
-			$problems[$row['id']] = $row;
+		    if ($row['level'] <= $level || $view_all)
+			    $problems[$row['id']] = $row;
 		return $problems;
 	}
 
@@ -511,6 +515,69 @@ class Assignment_model extends CI_Model
 			$this->db->query($query);
 		}
 	}
+	
+	// ------------------------------------------------------------------------
 
+
+
+	/**
+	 * Get current level of problems in given assignment
+	 *
+	 * For assignment with level_mode = 1 only
+	 *
+	 * This function is called from ???
+	 *
+	 * @param $assignment_id
+	 * @param $username
+	 */
+	
+	public function get_current_level($assignment_id, $username)
+	{
+	    $assignment = $this->assignment_info($assignment_id);
+	    
+	    if ($assignment['level_mode'] == 0)
+	        return 0;
+	    else
+	    {
+	        /* Get all problems in assignment sort by level, id
+	         * (copy from all_problems function)
+	         */
+	        $level = 0;
+	        $result = $this->db->order_by('level asc, id asc')->get_where('problems', array('assignment'=>$assignment_id))->result_array();
+		    $problems = array();
+		    foreach ($result as $row)
+			    $problems[$row['id']] = $row;
+			
+			
+			// Variable declaration & Loop for determining current level
+			foreach ($problems as $problem)
+			{
+                if ($problem['level'] > $level)
+                {
+			        $level = $problem['level'];
+			    }
+			    
+			    $arr = array('assignment' => $assignment_id,
+			        'is_final' => 1,
+			        'username' => $username,
+			        'problem' => $problem['id']);
+			       
+			    $final_submission = $this->db->get_where('submissions', $arr)->row_array();
+			    
+			    $final_submit_cnt = count($final_submission);
+			    
+                if ($final_submit_cnt == 0)
+                    break;
+			    else if ($final_submission['pre_score'] != 10000)
+			        break;
+			}
+			
+			// Check and set max-level to assignment
+			if ($level > $assignment['max_level'])
+			    $this->db->where('id', $assignment_id)->update('assignments', array('max_level' => $level));
+			
+			return $level;
+	    }
+	}
 
 }
