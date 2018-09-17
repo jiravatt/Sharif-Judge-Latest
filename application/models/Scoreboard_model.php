@@ -140,7 +140,8 @@ class Scoreboard_model extends CI_Model
 
 		// Generate the scoreboard's html code
 		// todo: Save Scoreboard as json (generate html at client side)
-		$all_problems = $this->assignment_model->all_problems($assignment_id);
+		$assignment = $this->assignment_model->assignment_info($assignment_id);
+		$all_problems = $this->assignment_model->all_problems($assignment_id, $assignment['max_level']);
 		$total_score = 0;
 		foreach($all_problems as $i)
 			$total_score += $i['score'];
