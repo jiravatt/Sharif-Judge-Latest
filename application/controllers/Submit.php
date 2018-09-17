@@ -29,7 +29,11 @@ class Submit extends CI_Controller
 			redirect('login');
 		$this->load->library('upload')->model('queue_model');
 		$this->assignment_root = $this->settings_model->get_setting('assignments_root');
-		$this->problems = $this->assignment_model->all_problems($this->user->selected_assignment['id']);
+		$level = $this->assignment_model->get_current_level($this->user->selected_assignment['id'], $this->user->username);
+		if ($level == 0 || $this->user->level >= 2)
+		    $this->problems = $this->assignment_model->all_problems($this->user->selected_assignment['id'], 0, true);
+		else
+		    $this->problems = $this->assignment_model->all_problems($this->user->selected_assignment['id'], $level);
 
 		$extra_time = $this->user->selected_assignment['extra_time'];
 		$delay = shj_now()-strtotime($this->user->selected_assignment['finish_time']);;
