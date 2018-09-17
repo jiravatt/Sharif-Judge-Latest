@@ -6,8 +6,8 @@
 {% set selected = 'problems' %}
 {% extends 'templates/base.twig' %}
 {% block icon %}fa-puzzle-piece{% endblock %}
-{% block title %}{% if can_view %}{{ all_problems[problem.id].name }}{% else %}Problems{% endif %}{% endblock %}
-{% block head_title %}{% if can_view %}{{ all_problems[problem.id].name }}{% else %}Problems{% endif %}{% endblock %}
+{% block title %}{% if can_view %}{{ user_problems[problem.id].name }}{% else %}Problems{% endif %}{% endblock %}
+{% block head_title %}{% if can_view %}{{ user_problems[problem.id].name }}{% else %}Problems{% endif %}{% endblock %}
 
 
 
@@ -64,7 +64,7 @@ $(document).ready(function(){
 	<div class="problems_widget">
 		<p dir="auto"><i class="fa fa-file-text fa-lg color9"></i> {{ description_assignment.name }}</p>
 
-		{% if all_problems|length == 0 %}
+		{% if user_problems|length == 0 %}
 			<p style="text-align: center;">Nothing to show...</p>
 		{% endif %}
 
@@ -77,7 +77,7 @@ $(document).ready(function(){
 				<th rowspan="2">Upload<br>Only</th>
 			</tr>
 			</thead>
-			{% for one_problem in all_problems %}
+			{% for one_problem in user_problems %}
 				<tr{{ problem.id == one_problem.id ? ' class="hl"' }}>
 					<td>{{ one_problem.id }}</td>
 					<td>
@@ -116,7 +116,9 @@ $(document).ready(function(){
 
 </div>
 {% else %}
+<div class="problem_description">
 	<p>{{ error_txt }}</p>
+</div>
 {% endif %}
 {% endblock %}
 
