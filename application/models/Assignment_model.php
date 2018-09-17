@@ -46,6 +46,7 @@ class Assignment_model extends CI_Model
 			'open' => ($this->input->post('open')===NULL?0:1),
 			'hide_before_start' => ($this->input->post('hide_before_start')===NULL?0:1),
 			'level_mode' => ($this->input->post('level_mode')===NULL?0:1),
+			'max_level' => 0,
 			'scoreboard' => ($this->input->post('scoreboard')===NULL?0:1),
 			'javaexceptions' => ($this->input->post('javaexceptions')===NULL?0:1),
 			'description' => '', /* todo */
