@@ -258,10 +258,9 @@ fi
 
 if [ "$EXT" = "py3" ]; then
 	cp $PROBLEMPATH/$UN/$FILENAME.py $FILENAME.py
-	# If mainprog.py exists, copy it to code.py and append content of user's written code
-	# or function to code.c
+	# If mainprog.py exists, append into user's written code
 	if [ -f "$PROBLEMPATH/mainprog.py" ]; then
-		shj_log "mainprog.py found! user's code has been appended."
+		shj_log "mainprog.py found! it has been appended into user's code."
 		cat $PROBLEMPATH/mainprog.py >> $FILENAME.py
 	fi
 	shj_log "Checking Python Syntax"
