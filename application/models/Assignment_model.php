@@ -573,7 +573,7 @@ class Assignment_model extends CI_Model
 			}
 			
 			// Check and set max-level to assignment
-			if ($level > $assignment['max_level'])
+			if ($level > $assignment['max_level'] && $this->user->get_user_level($username) == 0)
 			    $this->db->where('id', $assignment_id)->update('assignments', array('max_level' => $level));
 			
 			return $level;
