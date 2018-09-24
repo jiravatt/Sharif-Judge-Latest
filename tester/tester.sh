@@ -296,6 +296,7 @@ if [ "$EXT" = "c" ] || [ "$EXT" = "cpp" ]; then
 	COMPILER="gcc"
 	if [ "$EXT" = "cpp" ]; then
 		COMPILER="g++"
+		C_OPTIONS="$C_OPTIONS -std=c++14" # Use C++ 2014 Standard
 	fi
 	EXEFILE="s_$(echo $FILENAME | sed 's/[^a-zA-Z0-9]//g')" # Name of executable file
 	# If mainprog.c or mainprog.cpp exists, copy it to code.c and append content of user's written code
