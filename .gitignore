@@ -16,7 +16,4 @@ tester/easysandbox/t/*
 # Ignore MOSS File
 tester/moss
 
-# Config file
-application/config/config.php
-application/config/database.php
-assignments/.htaccess
+
