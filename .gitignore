@@ -16,4 +16,7 @@ tester/easysandbox/t/*
 # Ignore MOSS File
 tester/moss
 
+# Assignments folder
+assignments/*
+
 
