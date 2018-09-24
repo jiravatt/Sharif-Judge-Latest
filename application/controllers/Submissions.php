@@ -10,6 +10,8 @@ class Submissions extends CI_Controller
 {
 
 	private $problems;
+	
+	private $can_view;
 
 	private $filter_user;
 	private $filter_problem;
@@ -41,7 +43,7 @@ class Submissions extends CI_Controller
 		    $this->can_view = false;
 		else
 		    $this->can_view = true;
-
+		
 		$input = $this->uri->uri_to_assoc();
 		$this->filter_user = $this->filter_problem = NULL;
 		$this->page_number = 1;
@@ -275,6 +277,9 @@ class Submissions extends CI_Controller
 
 		if ($this->page_number<1)
 			show_404();
+		
+		if ( ! $this->can_view )
+		    show_404();
 
 		$config = array(
 			'base_url' => site_url('submissions/final'.($this->filter_user?'/user/'.$this->filter_user:'').($this->filter_problem?'/problem/'.$this->filter_problem:'')),
@@ -339,6 +344,9 @@ class Submissions extends CI_Controller
 
 		if ($this->page_number < 1)
 			show_404();
+			
+		if ( ! $this->can_view )
+		    show_404();
 
 		$config = array(
 			'base_url' => site_url('submissions/all'.($this->filter_user?'/user/'.$this->filter_user:'').($this->filter_problem?'/problem/'.$this->filter_problem:'')),
