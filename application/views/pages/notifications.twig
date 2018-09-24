@@ -12,7 +12,7 @@
 
 
 {% block title_menu %}
-	{% if user.level >= 2 %}
+	{% if user.level >= 1 %}
 	<span class="title_menu_item"><a href="{{ site_url('notifications/add') }}"><i class="fa fa-plus color10"></i> New</a></span>
 	{% endif %}
 {% endblock %}
@@ -29,7 +29,7 @@
 			<span class="anchor ttl_n">{{ notification.title }}</span>
 			<div class="notif_meta">
 				{{ notification.time }}
-				{% if user.level >= 2 %}
+				{% if user.level >= 1 %}
 					<span class="anchor edt_n">Edit</span>
 					<span class="anchor del_n">Delete</span>
 				{% endif %}

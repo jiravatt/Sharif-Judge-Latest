@@ -47,7 +47,7 @@ class Notifications extends CI_Controller
 
 	public function add()
 	{
-		if ( $this->user->level <=1) // permission denied
+		if ( $this->user->level < 1) // permission denied
 			show_404();
 
 		$this->form_validation->set_rules('title', 'title', 'trim');
@@ -80,7 +80,7 @@ class Notifications extends CI_Controller
 
 	public function edit($notif_id = FALSE)
 	{
-		if ($this->user->level <= 1) // permission denied
+		if ($this->user->level < 1) // permission denied
 			show_404();
 		if ($notif_id === FALSE || ! is_numeric($notif_id))
 			show_404();
@@ -96,7 +96,7 @@ class Notifications extends CI_Controller
 	{
 		if ( ! $this->input->is_ajax_request() )
 			show_404();
-		if ($this->user->level <= 1) // permission denied
+		if ($this->user->level < 1) // permission denied
 			$json_result = array('done' => 0, 'message' => 'Permission Denied');
 		elseif ($this->input->post('id') === NULL)
 			$json_result = array('done' => 0, 'message' => 'Input Error');
