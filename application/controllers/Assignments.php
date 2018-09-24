@@ -162,6 +162,19 @@ class Assignments extends CI_Controller
 			if (file_exists($path))
 				$this->zip->add_data("p{$i}/tester.cpp", file_get_contents($path));
 
+			// Add mainprog.* into a zip file
+			$path = "$root_path/p{$i}/mainprog.cpp"; 
+			if (file_exists($path))
+				$this->zip->add_data("p{$i}/mainprog.cpp", file_get_contents($path));
+			
+			$path = "$root_path/p{$i}/mainprog.c";
+			if (file_exists($path))
+				$this->zip->add_data("p{$i}/mainprog.c", file_get_contents($path));
+			
+			$path = "$root_path/p{$i}/mainprog.py";
+			if (file_exists($path))
+				$this->zip->add_data("p{$i}/mainprog.py", file_get_contents($path));
+
 			$pdf_files = glob("$root_path/p{$i}/*.pdf");
 			if ($pdf_files)
 			{
@@ -504,7 +517,7 @@ class Assignments extends CI_Controller
 
 			// Extract new test cases and descriptions in temp directory
 			$this->load->library('unzip');
-			$this->unzip->allow(array('txt', 'cpp', 'html', 'md', 'pdf'));
+			$this->unzip->allow(array('txt', 'cpp', 'html', 'md', 'pdf', 'py')); // To support mainprog.py
 			$extract_result = $this->unzip->extract($u_data['full_path'], $tmp_dir);
 
 			// Remove the zip file
@@ -514,12 +527,12 @@ class Assignments extends CI_Controller
 			{
 				// Remove previous test cases and descriptions
 				shell_exec("cd $assignment_dir;"
-					." rm -rf */in; rm -rf */out; rm -f */tester.cpp; rm -f */tester.executable;"
-					." rm -f */desc.html; rm -f */desc.md; rm -f */*.pdf;");
+					." rm -rf */in; rm -rf */out; rm -f */tester.cpp; rm -f */tester.executable;");
+//					." rm -f */desc.html; rm -f */desc.md; rm -f */*.pdf;");
 				if (glob("$tmp_dir/*.pdf"))
 					shell_exec("cd $assignment_dir; rm -f *.pdf");
 				// Copy new test cases from temp dir
-				shell_exec("cd $assignments_root; cp -R $tmp_dir_name/* assignment_{$the_id};");
+				shell_exec("cd $assignments_root; \\cp -Rf $tmp_dir_name/* assignment_{$the_id};");
 				$this->messages[] = array(
 					'type' => 'success',
 					'text' => 'Tests (zip file) extracted successfully.'
