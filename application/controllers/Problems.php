@@ -168,6 +168,7 @@ class Problems extends CI_Controller
 		$data = array(
 			'all_assignments' => $this->assignment_model->all_assignments(),
 			'description_assignment' => $this->assignment_model->assignment_info($assignment_id),
+			'problem_info' => $this->assignment_model->problem_info($assignment_id, $problem_id),
 		);
 
 		if ( ! is_numeric($problem_id) || $problem_id < 1 || $problem_id > $data['description_assignment']['problems'])

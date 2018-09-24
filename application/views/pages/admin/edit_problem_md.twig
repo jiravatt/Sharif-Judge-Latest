@@ -173,7 +173,7 @@ Violets are blue.
 <div id="md_div">
 	<p>
 		Assignment {{ description_assignment.id }} (<span dir="auto">{{ description_assignment.name }}</span>)<br>
-		Problem {{ problem.id }}
+		Problem {{ problem.id }} (<span dir="auto">{{ problem_info.name }}</span>)
 	</p>
 	{{ form_open("problems/edit/md/#{description_assignment.id}/#{problem.id}") }}
 	<p class="input_p">
