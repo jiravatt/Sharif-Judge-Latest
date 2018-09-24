@@ -53,7 +53,14 @@ class Assignments extends CI_Controller
 			ob_end_clean();
 			$item['coefficient'] = $coefficient;
 			$item['finished'] = ($delay > $extra_time);
-//			$item['is_participate'] = $this->assignment_model->is_participant($item['participants'],$this->user->username);
+			
+			// LEVEL mode
+			if ( $item['level_mode'] == 1 && $this->user->level == 0 )
+			{
+			    $level = $this->assignment_model->get_current_level($item['id'], $this->user->username);
+			    $item['problems'] = count($this->assignment_model->all_problems($item['id'], $level));
+		}
+
 		}
 
 		$this->twig->display('pages/assignments.twig', $data);
@@ -295,7 +302,7 @@ class Assignments extends CI_Controller
 			$data['edit_assignment'] = $this->assignment_model->assignment_info($this->edit_assignment);
 			if ($data['edit_assignment']['id'] === 0)
 				show_404();
-			$data['problems'] = $this->assignment_model->all_problems($this->edit_assignment);
+			$data['problems'] = $this->assignment_model->all_problems($this->edit_assignment, true);
 		}
 		else
 		{
@@ -305,6 +312,7 @@ class Assignments extends CI_Controller
 					array(
 						'id' => 1,
 						'name' => '',
+						'level' => 0,
 						'score' => 100,
 						'c_time_limit' => 500,
 						'python_time_limit' => 1500,
@@ -319,6 +327,7 @@ class Assignments extends CI_Controller
 			else
 			{
 				$names = $this->input->post('name');
+				$levels = $this->input->post('level');
 				$scores = $this->input->post('score');
 				$c_tl = $this->input->post('c_time_limit');
 				$py_tl = $this->input->post('python_time_limit');
@@ -335,6 +344,7 @@ class Assignments extends CI_Controller
 					array_push($data['problems'], array(
 						'id' => $i+1,
 						'name' => $names[$i],
+						'level' => $levels[$i],
 						'score' => $scores[$i],
 						'c_time_limit' => $c_tl[$i],
 						'python_time_limit' => $py_tl[$i],
@@ -374,6 +384,7 @@ class Assignments extends CI_Controller
 		$this->form_validation->set_rules('participants', 'participants', '');
 		$this->form_validation->set_rules('late_rule', 'coefficient rule', 'required');
 		$this->form_validation->set_rules('name[]', 'problem name', 'required|max_length[50]');
+		$this->form_validation->set_rules('level[]', 'problem level', 'required|greater_than_equal_to[0]');
 		$this->form_validation->set_rules('score[]', 'problem score', 'required|integer');
 		$this->form_validation->set_rules('c_time_limit[]', 'C/C++ time limit', 'required|integer');
 		$this->form_validation->set_rules('python_time_limit[]', 'python time limit', 'required|integer');

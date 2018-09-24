@@ -24,7 +24,23 @@ class Submissions extends CI_Controller
 		if ( ! $this->session->userdata('logged_in')) // if not logged in
 			redirect('login');
 		$this->load->model('submit_model');
-		$this->problems = $this->assignment_model->all_problems($this->user->selected_assignment['id']);
+		
+		// LEVEL mode
+		$selected_id = $this->user->selected_assignment['id'];
+		$assignment = $this->assignment_model->assignment_info($selected_id);
+	    if ( $assignment['level_mode'] == 1 && $this->user->level == 0 )
+		{
+			$level = $this->assignment_model->get_current_level($selected_id, $this->user->username);
+			$this->problems = $this->assignment_model->all_problems($selected_id, $level);
+		}
+		else
+		    $this->problems = $this->assignment_model->all_problems($selected_id, 0, true);
+		
+		// If user is not participated in current selected assignment, submissions cannot be viewed
+		if ( ($this->user->level < 2) && ! ($this->assignment_model->is_participant($assignment['participants'], $this->user->username)) )
+		    $this->can_view = false;
+		else
+		    $this->can_view = true;
 
 		$input = $this->uri->uri_to_assoc();
 		$this->filter_user = $this->filter_problem = NULL;
