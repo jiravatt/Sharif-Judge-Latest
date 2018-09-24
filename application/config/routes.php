@@ -80,6 +80,7 @@ $route['submissions/final']="submissions/the_final";
 $route['submissions/final/(.*)']="submissions/the_final/$1";
 $route['profile/(:num)'] = "profile/index/$1";
 $route['moss/(:num)'] = "moss/index/$1";
+$route['submit/editor'] = "submit/index/editor";
 $route['problems/(:num)'] = "problems/index/$1";
 $route['problems/(:num)/(:num)'] = "problems/index/$1/$2";
 $route['rejudge/(:num)'] = "rejudge/index/$1";

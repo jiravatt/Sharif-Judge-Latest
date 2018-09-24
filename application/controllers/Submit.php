@@ -67,6 +67,26 @@ class Submit extends CI_Controller
 	// ------------------------------------------------------------------------
 
 
+	public function _language_to_ext($language)
+	{
+		$language = strtolower ($language);
+		switch ($language) {
+			case 'c': return 'c';
+			case 'c++': return 'cpp';
+			case 'python 2': return 'py';
+			case 'python 3': return 'py';
+			case 'java': return 'java';
+			case 'zip': return 'zip';
+			case 'pdf': return 'pdf';
+			case 'flowgorithm': return 'fprg'; // Flowgorithm file
+			default: return FALSE;
+		}
+	}
+	
+	
+	// ------------------------------------------------------------------------
+
+
 	public function _match($type, $extension)
 	{
 		switch ($type) {
@@ -98,17 +118,27 @@ class Submit extends CI_Controller
 	// ------------------------------------------------------------------------
 
 
-	public function index()
+	public function index($mode = 'file')
 	{
 		$this->form_validation->set_rules('problem', 'problem', 'required|integer|greater_than[0]', array('greater_than' => 'Select a %s.'));
 		$this->form_validation->set_rules('language', 'language', 'required|callback__check_language', array('_check_language' => 'Select a valid %s.'));
 
 		if ($this->form_validation->run())
 		{
+		    if ($mode == 'file')
+		    {
 			if ($this->_upload())
 				redirect('submissions/all');
 			else
 				show_error('Error Uploading File: '.$this->upload->display_errors());
+		}
+            else if ($mode == 'editor')
+            {
+                if($this->_upload('editor'))
+                    redirect('submissions/all');
+                else
+                    show_error('Error Creating File. Please try again.');
+            }
 		}
 
 		$this->data = array(
@@ -120,6 +150,7 @@ class Submit extends CI_Controller
 			'problems_js' => '',
 			'error' => '',
 		);
+
 		foreach ($this->problems as $problem)
 		{
 			$languages = explode(',', $problem['allowed_languages']);
@@ -133,21 +164,27 @@ class Submit extends CI_Controller
 		}
 		if ($this->user->selected_assignment['id'] == 0)
 			$this->data['error']='Please select an assignment first.';
-		elseif ($this->user->level==0 && ! $this->user->selected_assignment['open'])
-			$this->data['error'] = 'Selected assignment is closed.';
-		elseif ($this->user->level==0 && shj_now() < strtotime($this->user->selected_assignment['start_time']))
+	    elseif ($this->user->level < 2 &&  ! $this->assignment_model->is_participant($this->user->selected_assignment['participants'],$this->user->username) )
+			$this->data['error'] = 'You cannot submit this assignment right now.';
+		elseif ($this->user->level < 2 && shj_now() < strtotime($this->user->selected_assignment['start_time']))
 			$this->data['error'] = 'Selected assignment has not started.';
-		elseif ($this->user->level==0 && shj_now() > strtotime($this->user->selected_assignment['finish_time'])+$this->user->selected_assignment['extra_time']) // deadline = finish_time + extra_time
+		elseif ($this->user->level == 0 && ! $this->user->selected_assignment['open'])
+			$this->data['error'] = 'Selected assignment is closed.';
+		elseif ($this->user->level == 0 && shj_now() > strtotime($this->user->selected_assignment['finish_time'])+$this->user->selected_assignment['extra_time']) // deadline = finish_time + extra_time
 			$this->data['error'] = 'Selected assignment has finished.';
-		elseif ($this->user->level==0 &&  ! $this->assignment_model->is_participant($this->user->selected_assignment['participants'],$this->user->username) )
-			$this->data['error'] = 'You are not registered for submitting.';
 		else
 			$this->data['error'] = 'none';
 
 //		if ($this->user->level > 0)
 //			$this->data['error'] = 'none';
 
+        if ($mode == 'file')
 		$this->twig->display('pages/submit.twig', $this->data);
+        else if ($mode == 'editor')
+        {
+            $this->data['code_txt'] = $code;
+            $this->twig->display('pages/editor.twig', $this->data);
+        }
 
 	}
 
@@ -158,7 +195,7 @@ class Submit extends CI_Controller
 	/**
 	 * Saves submitted code and adds it to queue for judging
 	 */
-	private function _upload()
+	private function _upload($mode = 'file')
 	{
 		$now = shj_now();
 		foreach($this->problems as $item)
@@ -168,8 +205,15 @@ class Submit extends CI_Controller
 				break;
 			}
 		$this->filetype = $this->_language_to_type(strtolower(trim($this->input->post('language'))));
+		if ($mode == 'file')
+		{
 		$this->ext = substr(strrchr($_FILES['userfile']['name'],'.'),1); // uploaded file extension
 		$this->file_name = basename($_FILES['userfile']['name'], ".{$this->ext}"); // uploaded file name without extension
+		}
+		else if ($mode == 'editor')
+		{
+		    $this->ext = $this->_language_to_ext(strtolower(trim($this->input->post('language'))));
+		}
 		if ( $this->queue_model->in_queue($this->user->username,$this->user->selected_assignment['id'], $this->problem['id']) )
 			show_error('You have already submitted for this problem. Your last submission is still in queue.');
 		if ($this->user->level==0 && !$this->user->selected_assignment['open'])
@@ -180,6 +224,9 @@ class Submit extends CI_Controller
 			show_error('Selected assignment has finished.');
 		if ($this->user->level==0 &&  ! $this->assignment_model->is_participant($this->user->selected_assignment['participants'],$this->user->username) )
 			show_error('You are not registered for submitting.');
+		
+		if ($mode == 'file')
+		{
 		$filetypes = explode(",",$this->problem['allowed_languages']);
 		foreach ($filetypes as &$filetype)
 		{
@@ -193,11 +240,14 @@ class Submit extends CI_Controller
 			show_error('This file type does not match your selected language.');
 		if ( ! preg_match('/^[a-zA-Z0-9_\-()]+$/', $this->file_name) )
 			show_error('Invalid characters in file name.');
+		}
 
 		$user_dir = rtrim($this->assignment_root, '/').'/assignment_'.$this->user->selected_assignment['id'].'/p'.$this->problem['id'].'/'.$this->user->username;
 		if ( ! file_exists($user_dir))
 			mkdir($user_dir, 0700);
 
+        if ($mode == 'file')
+        {
 		$config['upload_path'] = $user_dir;
 		$config['allowed_types'] = '*';
 		$config['max_size']	= $this->settings_model->get_setting('file_size_limit');
@@ -206,9 +256,23 @@ class Submit extends CI_Controller
 		$config['remove_spaces'] = TRUE;
 		$this->upload->initialize($config);
 
-		if ($this->upload->do_upload('userfile'))
+		    if(! $this->upload->do_upload('userfile'))
+		        return FALSE;
+		    else
+		        $result = $this->upload->data();
+		}
+		else if ($mode == 'editor')
 		{
-			$result = $this->upload->data();
+		    $this->load->helper('file');
+        
+            $file_content = $this->input->post('content');
+            $file_name = "editor-".($this->user->selected_assignment['total_submits']+1);
+            $user_file_path = $user_dir."/".$file_name.".".$this->ext;
+            
+            if (! write_file($user_file_path, $file_content))
+                return FALSE;
+		}
+
 			$this->load->model('submit_model');
 
 			$submit_info = array(
@@ -216,13 +280,24 @@ class Submit extends CI_Controller
 				'username' => $this->user->username,
 				'assignment' => $this->user->selected_assignment['id'],
 				'problem' => $this->problem['id'],
-				'file_name' => $result['raw_name'],
-				'main_file_name' => $this->file_name,
 				'file_type' => $this->filetype,
 				'coefficient' => $this->coefficient,
 				'pre_score' => 0,
 				'time' => shj_now_str(),
 			);
+		
+		if ($mode == 'file')
+		{
+		    $submit_info['file_name'] = $result['raw_name'];
+		    $submit_info['main_file_name'] = $this->file_name;
+		}
+		else if ($mode == 'editor')
+		{
+		    $submit_info['file_name'] = $file_name;
+		    $submit_info['main_file_name'] = 'editor';
+		}
+		    
+		    
 			if ($this->problem['is_upload_only'] == 0)
 			{
 				$this->queue_model->add_to_queue($submit_info);

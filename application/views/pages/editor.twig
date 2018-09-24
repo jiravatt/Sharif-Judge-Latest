@@ -1,0 +1,130 @@
+{#
+ # Sharif Judge
+ # file: add_notification.twig
+ # author: Mohammad Javad Naderi <mjnaderi@gmail.com>
+ #}
+{% set selected = 'editor' %}
+{% extends 'templates/base.twig' %}
+{% block icon %}fa-file-text{% endblock %}
+{% block title %}Code Editor{% endblock %}
+{% block head_title %}Code Editor{% endblock %}
+
+{% block other_assets %}
+<style>
+    #code{
+        display: none;
+    }
+    
+	#code_div{
+	    height: 250px;
+		display: block;
+	}
+</style>
+<script>
+	shj.p={};
+	{{ problems_js|raw }}
+	$(document).ready(function(){
+		$("select#problems").change(function(){
+			var v = $(this).val();
+			$('select#languages').empty();
+			$('<option value="0" selected="selected">-- Select Language --</option>').appendTo('select#languages');
+			if (v==0)
+				return;
+			for (var i=0;i<shj.p[v].length;i++)
+				$('<option value="'+shj.p[v][i]+'">'+shj.p[v][i]+'</option>').appendTo('select#languages');
+		});
+	});
+</script>
+{% endblock %}
+
+
+
+{% block main_content %}
+{% if error != 'none' %}
+<p>{{ error }}</p>
+{% else %}
+ {#   <p>a = {{ code_txt }}</p> #}
+	<p>Selected assignment: <span dir="auto">{{ user.selected_assignment.name }}</span></p>
+	<p>Coefficient: {{ coefficient }}%</p>
+	{{ form_open_multipart('submit/editor') }}
+	<p class="input_p">
+		<label for="problems" class="tiny">Problem:</label>
+		<select id="problems" name ="problem" class="sharif_input">
+			<option value="0" selected="selected">-- Select Problem --</option>
+			{% for problem in problems %}
+			    {% if problem.is_upload_only == 0 %}
+				    <option dir="auto" value="{{ problem.id }}">({{ problem.id }}) {{ problem.name }}</option>
+				{% endif %}
+			{% endfor %}
+		</select>
+		{{ form_error('problem','<div class="shj_error">','</div>') }}
+	</p>
+	<p class="input_p">
+		<label for="languages" class="tiny">Language:</label>
+		<select id="languages" name="language" class="sharif_input">
+			<option value="0" selected="selected">-- Select Language --</option>
+		</select>
+		{{ form_error('language','<div class="shj_error">','</div>') }}
+	</p>
+	
+	<p class="input_p">Code:</p>
+	<p class="input_p">
+	    <div id="code_div"></div>
+    </p>
+    
+    <p class="input_p">
+        <textarea name="content" id="content" style="display:none;"></textarea>
+		<input type="submit" value="Submit" class="sharif_input"/>
+	</p>
+	
+	
+	</form>
+	
+    	<script src="/assets/ace_editor/ace.js" type="text/javascript" charset="utf-8"></script>
+    	
+    	<script>
+    	$(document).ready(function(){
+            var editor = ace.edit("code_div");
+            var textarea = $('#content');
+            editor.setOption("fontSize", 13);
+	        editor.setShowPrintMargin(false);
+	        editor.getSession().setUseSoftTabs(false);
+//            editor.setTheme("ace/theme/chrome");
+            editor.session.setMode("ace/mode/text");
+            
+            $(document).on('change', "#languages", function(){
+		        var lang_id = $("#languages").val();
+		        if (lang_id != 0) {
+		            switch (lang_id)
+		            {
+		                case "C":
+		                    editor.session.setMode("ace/mode/c_cpp");
+		                    break;
+		                case "C++":
+		                    editor.session.setMode("ace/mode/c_cpp");
+		                    break;
+		                case "Python 3":
+		                    editor.session.setMode("ace/mode/python");
+		                    break;
+		                case "Java":
+		                    editor.session.setMode("ace/mode/java");
+		                    break;
+		            }
+		        } else {
+			        editor.session.setMode('ace/mode/text');
+		        }
+	        });
+            $("#languages").change();
+            
+            editor.getSession().on('change', function () {
+                textarea.val(editor.getSession().getValue());
+            });
+
+            textarea.val(editor.getSession().getValue());
+       
+        });
+        </script>
+
+	
+{% endif %}
+{% endblock %}  {# main_content #}

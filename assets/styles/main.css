@@ -413,6 +413,7 @@ div#extra_time i {
 .color-assignments {border-color: #CCDB29!important;}
 .color-problems {border-color: #0DB297!important;}
 .color-submit {border-color: #35C0CB!important;}
+.color-editor {border-color: #6588C6!important;}
 .color-final_submissions {border-color: #22478A!important;}
 .color-all_submissions {border-color: #543680!important;}
 .color-scoreboard {border-color: #991B4A!important;}
@@ -424,6 +425,7 @@ div#extra_time i {
 .color-assignments.selected i {background-color: #CCDB29!important;border-color: #CCDB29!important;}
 .color-problems.selected i {background-color: #0DB297!important;border-color: #0DB297!important;}
 .color-submit.selected i {background-color: #35C0CB!important;border-color: #35C0CB!important;}
+.color-editor.selected i {background-color: #6588C6!important;border-color: #6588C6!important;}
 .color-final_submissions.selected i {background-color: #22478A!important;border-color: #22478A!important;}
 .color-all_submissions.selected i {background-color: #543680!important;border-color: #543680!important;}
 .color-scoreboard.selected i {background-color: #991B4A!important;border-color: #991B4A!important;}
