@@ -76,37 +76,39 @@ class Problems extends CI_Controller
 		if ( $assignment['id'] == 0 ) {
 			$data['can_view'] = FALSE;
 			$data['error_txt'] = 'Problem does not exist.';
-		} else if ( ($this->user->level == 0) && ! ($this->assignment_model->is_participant($assignment['participants'], $this->user->username)) ) {
+			$data['can_submit'] = FALSE;
+		} else if ( ($this->user->level < 2) && ! ($this->assignment_model->is_participant($assignment['participants'], $this->user->username)) ) {
 			$data['can_view'] = FALSE;
 			$data['error_txt'] = 'Problem does not exist.';
-		} else if ( ($this->user->level == 0) && shj_now() < strtotime($assignment['start_time']) ) {
+			$data['can_submit'] = FALSE;
+		} else if ( ($this->user->level < 2) && shj_now() < strtotime($assignment['start_time']) ) {
 			if ( $assignment['hide_before_start'] == 1 )
 				$data['error_txt'] = 'Problem does not exist.';
 			else
 				$data['error_txt'] = 'Please wait until this assignment starts.';
 			$data['can_view'] = FALSE;
+			$data['can_submit'] = FALSE;
 		} else if ( ($this->user->level == 0) && ! ($assignment['open']) ) {
 			$data['can_view'] = FALSE;
 			$data['error_txt'] = 'This assignment has been closed.';
+			$data['can_submit'] = FALSE;
+		} else if ( ($this->user->level == 0) && shj_now() > strtotime($assignment['finish_time'])+$assignment['extra_time'] ) {
+		    $data['can_submit'] = FALSE;
 		} else if ( $problem_id > $data['description_assignment']['problems'] ) {
 			$data['can_view'] = FALSE;
 			$data['error_txt'] = 'Problem does not exist.';
+			$data['can_submit'] = FALSE;
 		} else if ( ($this->user->level < 2) && $assignment['level_mode'] == 1 && $data['all_problems'][$problem_id]['level'] > $level) {
 		    $data['can_view'] = FALSE;
 			$data['error_txt'] = 'Problem does not exist.';
 			$data['can_submit'] = FALSE;
 		}
 
-		if ( $assignment['id'] == 0
-			OR ! $assignment['open']
-			OR shj_now() < strtotime($assignment['start_time'])
-			OR shj_now() > strtotime($assignment['finish_time'])+$assignment['extra_time'] // deadline = finish_time + extra_time
-			OR ! $this->assignment_model->is_participant($assignment['participants'], $this->user->username)
-		)
+		if ( $assignment_id != $this->user->selected_assignment['id'] )
 			$data['can_submit'] = FALSE;
 
-		if ( $this->user->level > 0 )
-			$data['can_submit'] = TRUE;
+//		if ( $this->user->level > 0 )
+//			$data['can_submit'] = TRUE;
 
 		if ( $data['can_view'] == TRUE )
 		{
