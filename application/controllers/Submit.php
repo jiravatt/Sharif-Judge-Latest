@@ -213,8 +213,8 @@ class Submit extends CI_Controller
 		$this->filetype = $this->_language_to_type(strtolower(trim($this->input->post('language'))));
 		if ($mode == 'file')
 		{
-		$this->ext = substr(strrchr($_FILES['userfile']['name'],'.'),1); // uploaded file extension
-		$this->file_name = basename($_FILES['userfile']['name'], ".{$this->ext}"); // uploaded file name without extension
+			$this->ext = substr(strrchr($_FILES['userfile']['name'],'.'),1); // uploaded file extension
+			$this->file_name = basename($_FILES['userfile']['name'], ".{$this->ext}"); // uploaded file name without extension
 		}
 		else if ($mode == 'editor')
 		{
@@ -254,13 +254,13 @@ class Submit extends CI_Controller
 
         if ($mode == 'file')
         {
-		$config['upload_path'] = $user_dir;
-		$config['allowed_types'] = '*';
-		$config['max_size']	= $this->settings_model->get_setting('file_size_limit');
-		$config['file_name'] = $this->file_name."-".($this->user->selected_assignment['total_submits']+1).".".$this->ext;
-		$config['max_file_name'] = 20;
-		$config['remove_spaces'] = TRUE;
-		$this->upload->initialize($config);
+			$config['upload_path'] = $user_dir;
+			$config['allowed_types'] = '*';
+			$config['max_size']	= $this->settings_model->get_setting('file_size_limit');
+			$config['file_name'] = $this->file_name."-".($this->user->selected_assignment['total_submits']+1).".".$this->ext;
+			$config['max_file_name'] = 20;
+			$config['remove_spaces'] = TRUE;
+			$this->upload->initialize($config);
 
 		    if(! $this->upload->do_upload('userfile'))
 		        return FALSE;
@@ -279,18 +279,18 @@ class Submit extends CI_Controller
                 return FALSE;
 		}
 
-			$this->load->model('submit_model');
+		$this->load->model('submit_model');
 
-			$submit_info = array(
-				'submit_id' => $this->assignment_model->increase_total_submits($this->user->selected_assignment['id']),
-				'username' => $this->user->username,
-				'assignment' => $this->user->selected_assignment['id'],
-				'problem' => $this->problem['id'],
-				'file_type' => $this->filetype,
-				'coefficient' => $this->coefficient,
-				'pre_score' => 0,
-				'time' => shj_now_str(),
-			);
+		$submit_info = array(
+			'submit_id' => $this->assignment_model->increase_total_submits($this->user->selected_assignment['id']),
+			'username' => $this->user->username,
+			'assignment' => $this->user->selected_assignment['id'],
+			'problem' => $this->problem['id'],
+			'file_type' => $this->filetype,
+			'coefficient' => $this->coefficient,
+			'pre_score' => 0,
+			'time' => shj_now_str(),
+		);
 		
 		if ($mode == 'file')
 		{
@@ -304,20 +304,17 @@ class Submit extends CI_Controller
 		}
 		    
 		    
-			if ($this->problem['is_upload_only'] == 0)
-			{
-				$this->queue_model->add_to_queue($submit_info);
-				process_the_queue();
-			}
-			else
-			{
-				$this->submit_model->add_upload_only($submit_info);
-			}
-
-			return TRUE;
+		if ($this->problem['is_upload_only'] == 0)
+		{
+			$this->queue_model->add_to_queue($submit_info);
+			process_the_queue();
+		}
+		else
+		{
+			$this->submit_model->add_upload_only($submit_info);
 		}
 
-		return FALSE;
+		return TRUE;
 	}
 
 
