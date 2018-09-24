@@ -53,6 +53,18 @@ class Problems extends CI_Controller
 			'can_view' => TRUE,
 			'error_txt' => '',
 		);
+		
+		// LEVEL mode
+		if ($assignment['level_mode'] == 1 && $this->user->level < 2)
+		{
+		    $level = $this->assignment_model->get_current_level($assignment_id, $this->user->username);
+		    $data['user_problems'] = $this->assignment_model->all_problems($assignment_id, $level);
+		}
+		else
+		{
+		    $level = 0;
+		    $data['user_problems'] = $this->assignment_model->all_problems($assignment_id, 0, true);
+		}
 
 		$this->load->model('submit_model');
 		

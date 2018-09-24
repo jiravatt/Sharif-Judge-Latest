@@ -59,7 +59,7 @@ class Assignments extends CI_Controller
 			{
 			    $level = $this->assignment_model->get_current_level($item['id'], $this->user->username);
 			    $item['problems'] = count($this->assignment_model->all_problems($item['id'], $level));
-		}
+			}
 
 		}
 
@@ -161,6 +161,19 @@ class Assignments extends CI_Controller
 			$path = "$root_path/p{$i}/tester.cpp";
 			if (file_exists($path))
 				$this->zip->add_data("p{$i}/tester.cpp", file_get_contents($path));
+			
+			// Add mainprog.* into a zip file
+			$path = "$root_path/p{$i}/mainprog.cpp"; 
+			if (file_exists($path))
+				$this->zip->add_data("p{$i}/mainprog.cpp", file_get_contents($path));
+			
+			$path = "$root_path/p{$i}/mainprog.c";
+			if (file_exists($path))
+				$this->zip->add_data("p{$i}/mainprog.c", file_get_contents($path));
+			
+			$path = "$root_path/p{$i}/mainprog.py";
+			if (file_exists($path))
+				$this->zip->add_data("p{$i}/mainprog.py", file_get_contents($path));
 
 			// Add mainprog.* into a zip file
 			$path = "$root_path/p{$i}/mainprog.cpp"; 

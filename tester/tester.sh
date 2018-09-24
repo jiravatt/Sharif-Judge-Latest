@@ -310,7 +310,7 @@ if [ "$EXT" = "c" ] || [ "$EXT" = "cpp" ]; then
 		cp $PROBLEMPATH/mainprog.cpp code.c
 		cat $PROBLEMPATH/$UN/$FILENAME.$EXT >> code.c
 	else
-	cp $PROBLEMPATH/$UN/$FILENAME.$EXT code.c
+		cp $PROBLEMPATH/$UN/$FILENAME.$EXT code.c
 	fi
 	shj_log "Compiling as $EXT"
 	if $SANDBOX_ON; then

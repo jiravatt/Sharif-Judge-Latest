@@ -548,7 +548,6 @@ class Assignment_model extends CI_Model
 		    $problems = array();
 		    foreach ($result as $row)
 			    $problems[$row['id']] = $row;
-
 			// Variable declaration & Loop for determining current level
 			foreach ($problems as $problem)
 			{
