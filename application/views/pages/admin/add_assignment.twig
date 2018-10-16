@@ -21,21 +21,23 @@
 <script type="text/javascript" src="{{ base_url('assets/js/jquery-ui-timepicker-addon.js') }}"></script>
 <script>
 	shj.num_of_problems={{ problems|length }};
-	shj.row='<tr><td>PID</td>\
-	<td><input type="text" name="name[]" class="sharif_input short" value=""/></td>\
-	<td><input type="text" name="level[]" class="sharif_input tiny2" value="0"/></td>\
-	<td><input type="text" name="score[]" class="sharif_input tiny2" value="100"/></td>\
-	<td><input type="text" name="c_time_limit[]" class="sharif_input tiny2" value="500"/></td>\
-	<td><input type="text" name="python_time_limit[]" class="sharif_input tiny2" value="1500"/></td>\
-	<td><input type="text" name="java_time_limit[]" class="sharif_input tiny2" value="2000"/></td>\
-	<td><input type="text" name="memory_limit[]" class="sharif_input tiny" value="65536"/></td>\
-	<td><input type="text" name="languages[]" class="sharif_input short2" value="Python 3,C++"/></td>\
-	<td><input type="text" name="diff_cmd[]" class="sharif_input tiny" value="diff"/></td>\
-	<td><input type="text" name="diff_arg[]" class="sharif_input tiny" value="-bB"/></td>\
-	<td><input type="checkbox" name="is_upload_only[]" class="check" value="PID"/><td><i class="fa fa-times-circle fa-lg color1 delete_problem pointer"></i></td></td>\
-</tr>';
 	$(document).ready(function(){
 		$("#add").click(function(){
+			default_languages = $("input[name='languages[]']").map(function(){return $(this).val();}).get();
+			levels = $("input[name='level[]']").map(function(){return $(this).val();}).get();
+			shj.row='<tr><td>PID</td>\
+				<td><input type="text" name="name[]" class="sharif_input short" value=""/></td>\
+				<td><input type="text" name="level[]" class="sharif_input tiny2" value="' + levels[shj.num_of_problems-1] + '"/></td>\
+				<td><input type="text" name="score[]" class="sharif_input tiny2" value="100"/></td>\
+				<td><input type="text" name="c_time_limit[]" class="sharif_input tiny2" value="500"/></td>\
+				<td><input type="text" name="python_time_limit[]" class="sharif_input tiny2" value="1500"/></td>\
+				<td><input type="text" name="java_time_limit[]" class="sharif_input tiny2" value="2000"/></td>\
+				<td><input type="text" name="memory_limit[]" class="sharif_input tiny" value="65536"/></td>\
+				<td><input type="text" name="languages[]" class="sharif_input short2" value="'+ default_languages[shj.num_of_problems-1] +'"/></td>\
+				<td><input type="text" name="diff_cmd[]" class="sharif_input tiny" value="diff"/></td>\
+				<td><input type="text" name="diff_arg[]" class="sharif_input tiny" value="-bB"/></td>\
+				<td><input type="checkbox" name="is_upload_only[]" class="check" value="PID"/><td><i class="fa fa-times-circle fa-lg color1 delete_problem pointer"></i></td></td>\
+			</tr>';
 			$('#problems_table>tbody').append(shj.row.replace(/PID/g, (shj.num_of_problems+1)));
 			shj.num_of_problems++;
 			$('#nop').attr('value', shj.num_of_problems);
@@ -59,6 +61,22 @@
 		$('#finish_time').datetimepicker({
 			timeFormat: 'HH:mm:ss'
 		});
+		$(document).on('change', "#form_a_forever", function(){
+			var forever_checkbox = document.getElementById("form_a_forever");
+			if (forever_checkbox.checked)
+			{
+				$("#finish_time").attr("disabled", "disabled");
+				$("#form_extra_time").attr("disabled", "disabled");
+				$("#form_late_rule").attr("disabled", "disabled");	
+			}
+			else
+			{
+				$("#finish_time").removeAttr("disabled");
+				$("#form_extra_time").removeAttr("disabled");
+				$("#form_late_rule").removeAttr("disabled");
+			}
+		});
+		$("#form_a_forever").change();
 	});
 </script>
 {% endblock %}
@@ -141,6 +159,12 @@
 		<label for="form_a_open" class="default">Open</label>
 		<span class="form_comment space-left">Open or close this assignment</span>
 		{{ form_error('open', '<div class="shj_error">', '</div>') }}
+	</p>
+	<p class="input_p">
+		<input id="form_a_forever" type="checkbox" name="forever" value="1" {{ edit ? (edit_assignment.forever ? 'checked') : set_checkbox('forever', '1')|raw }} />
+		<label for="form_a_forever" class="default">Forever</label>
+		<span class="form_comment space-left">Check if this assignment must be always shown</span>
+		{# {{ form_error('open', '<div class="shj_error">', '</div>') }} #}
 	</p>
 	<p class="input_p">
 		<input id="form_a_hide" type="checkbox" name="hide_before_start" value="1" {{ edit ? (edit_assignment.hide_before_start ? 'checked') : set_checkbox('hide_before_start', '1')|raw }} />

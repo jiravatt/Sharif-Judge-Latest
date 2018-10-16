@@ -303,7 +303,10 @@ class Submissions extends CI_Controller
 			$item['name'] = $names[$item['username']];
 			$item['fullmark'] = ($item['pre_score'] == 10000);
 			$item['pre_score'] = ceil($item['pre_score']*$this->problems[$item['problem']]['score']/10000);
-			$item['delay'] = strtotime($item['time'])-strtotime($this->user->selected_assignment['finish_time']);
+			if ($this->user->selected_assignment['forever'] == 0)
+				$item['delay'] = strtotime($item['time'])-strtotime($this->user->selected_assignment['finish_time']);
+			else
+				$item['delay'] = 0;
 			$item['language'] = filetype_to_language($item['file_type']);
 			if ($item['coefficient'] === 'error')
 				$item['final_score'] = 0;
@@ -370,7 +373,10 @@ class Submissions extends CI_Controller
 			$item['name'] = $names[$item['username']];
 			$item['fullmark'] = ($item['pre_score'] == 10000);
 			$item['pre_score'] = ceil($item['pre_score']*$this->problems[$item['problem']]['score']/10000);
-			$item['delay'] = strtotime($item['time'])-strtotime($this->user->selected_assignment['finish_time']);
+			if ($this->user->selected_assignment['forever'] != 1)
+				$item['delay'] = strtotime($item['time'])-strtotime($this->user->selected_assignment['finish_time']);
+			else
+				$item['delay'] = 0;
 			$item['language'] = filetype_to_language($item['file_type']);
 			if ($item['coefficient'] === 'error')
 				$item['final_score'] = 0;
@@ -409,7 +415,7 @@ class Submissions extends CI_Controller
 			show_404();
 
 		// Students cannot change their final submission after finish_time + extra_time
-		if ($this->user->level === 0)
+		if ( $this->user->level === 0 && $this->user->selected_assignment['forever'] != 1 )
 			if ( shj_now() > strtotime($this->user->selected_assignment['finish_time'])+$this->user->selected_assignment['extra_time'])
 			{
 				$json_result = array(

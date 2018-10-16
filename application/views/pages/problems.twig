@@ -68,23 +68,37 @@ $(document).ready(function(){
 			<p style="text-align: center;">Nothing to show...</p>
 		{% endif %}
 
-		<table class="sharif_table">
+		<table class="problem_table">
 			<thead>
 			<tr>
-				<th rowspan="2">#</th>
+				{{ user.level > 0 ? '<th rowspan="2">#</th>' : '' }} 
 				<th rowspan="2">Problem</th>
-				<th rowspan="2">Score</th>
-				<th rowspan="2">Upload<br>Only</th>
+				{% if description_assignment.level_mode == 1 %}
+					{{ user.level > 0 ? '<th rowspan="2">LEVEL</th>' : '' }}
+					<th rowspan="2">{{ user.level > 0 ? 'Score' : 'Final<br/>Score' }}</th>
+				{% else %}
+					<th rowspan="2">Score</th>
+					<th rowspan="2">{{ user.level > 0 ? 'Upload<br/>only' : 'Final<br/>Score' }}</th>
+				{% endif %}
+				
 			</tr>
 			</thead>
 			{% for one_problem in user_problems %}
 				<tr{{ problem.id == one_problem.id ? ' class="hl"' }}>
-					<td>{{ one_problem.id }}</td>
+					{% if user.level > 0 %}
+						<td>{{ one_problem.id }}</td>
+					{% endif %}
 					<td>
 						<a dir="auto" href="{{ site_url("problems/#{description_assignment.id}/#{one_problem.id}") }}">{{ one_problem.name }}</a>
 					</td>
-					<td>{{ one_problem.score }}</td>
-					<td>{{ one_problem.is_upload_only ? 'Yes' : 'No' }}</td>
+					{% if description_assignment.level_mode == 1 %}
+
+						{% if user.level > 0 %}<td>{{ one_problem.level }}</td>{% endif %}
+						<td>{% if user.level > 0 %}{{one_problem.score}}{% else %}{{ one_problem.pre_score == -1 ? '-' : one_problem.final_score }}{% endif %}</td>
+					{% else %}
+						<td>{{ one_problem.score }}</td>
+						<td>{% if user.level > 0 %}{{ one_problem.is_upload_only ? 'Yes' : 'No' }}{% else %}{{ one_problem.pre_score == -1 ? '-' : one_problem.final_score }}{% endif %}</td>
+					{% endif %}
 				</tr>
 			{% endfor %}
 		</table>
@@ -92,7 +106,7 @@ $(document).ready(function(){
 
 	{% if can_submit %}
 	<div class="problems_widget">
-		<p><i class="fa fa-upload fa-lg color11"></i> Submit</p>
+		<p><i class="fa fa-file-text fa-lg color7"></i> File Submit</p>
 		{{ form_open_multipart('submit') }}
 		<input type="hidden" name="problem" value="{{ problem.id }}"/>
 
@@ -116,9 +130,7 @@ $(document).ready(function(){
 
 </div>
 {% else %}
-<div class="problem_description">
 	<p>{{ error_txt }}</p>
-</div>
 {% endif %}
 {% endblock %}
 

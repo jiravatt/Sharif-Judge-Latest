@@ -73,7 +73,7 @@
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller'] = 'assignments';
+$route['default_controller'] = 'notifications';
 $route['register'] = "login/register";
 $route['logout'] = "login/logout";
 $route['submissions/final']="submissions/the_final";

@@ -41,7 +41,7 @@ class Login extends CI_Controller
 	public function index()
 	{
 		if ($this->session->userdata('logged_in')) // if logged in
-			redirect('assignments');
+			redirect('notifications');
 		$this->form_validation->set_rules('username', 'Username', 'required|min_length[3]|max_length[20]|alpha_numeric|lowercase');
 		$this->form_validation->set_rules('password', 'Password', 'required|min_length[6]|max_length[200]');
 		$data = array(

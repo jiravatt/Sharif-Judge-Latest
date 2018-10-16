@@ -56,13 +56,13 @@
 		{% if view == 'all' %}
 			<th width="1%" rowspan="2">Final</th>
 		{% endif %}
-		{% if user.level > 0 %}
-				{% if view == 'all' %}
+		{% if user.level > 0 and user.selected_assignment.forever == 0 %}
+			{% if view == 'all' %}
 				<th width="3%" rowspan="2">ID</th>
-				{% else %}
+			{% else %}
 				<th width="2%" rowspan="2">#</th>
 				<th width="3%" rowspan="2">ID</th>
-				{% endif %}
+			{% endif %}
 			{#	<th width="6%" rowspan="2">Username</th>	#}
 				<th width="12%" rowspan="2">Name</th>
 				<th width="12%" rowspan="2">Problem</th>
@@ -72,28 +72,54 @@
 				<th width="6%" rowspan="2">Status</th>
 				<th width="6%" rowspan="2">Code</th>
 				<th width="6%" rowspan="2">Log</th>
-				{% if user.level >= 2 %}
+			{% if user.level >= 2 %}
 				<th width="1%" rowspan="2">Actions</th>
-				{% endif %}
-			</tr>
-			<tr>
-				<th width="5%" class="score">Score</th>
-				<th width="5%" class="score">Delay<br>%</th>
-				<th width="5%" class="score">Final Score</th>
-			</tr>
-		{% else %}
-				<th width="23%" rowspan="2">Problem</th>
-				<th width="17%" rowspan="2">Submit Time</th>
-				<th width="7%" colspan="3">Score</th>
+			{% endif %}
+		</tr>
+		<tr>
+			<th width="5%" class="score">Score</th>
+			<th width="5%" class="score">Delay<br>%</th>
+			<th width="5%" class="score">Final Score</th>
+		</tr>
+		{% elseif user.level > 0 %}
+			{% if view == 'all' %}
+				<th width="3%" rowspan="2">ID</th>
+			{% else %}
+				<th width="2%" rowspan="2">#</th>
+				<th width="3%" rowspan="2">ID</th>
+			{% endif %}
+				<th width="12%" rowspan="2">Name</th>
+				<th width="12%" rowspan="2">Problem</th>
+				<th width="12%" rowspan="2">Submit Time</th>
 				<th width="1%" rowspan="2">Language</th>
-				<th width="10%" rowspan="2">Status</th>
-				<th width="15%" rowspan="2">Code</th>
-			</tr>
-			<tr>
-				<th width="7%" class="score">Score</th>
-				<th width="7%" class="score">Delay<br>%</th>
-				<th width="7%" class="score">Final Score</th>
-			</tr>
+				<th width="7%" rowspan="2">Status</th>
+				<th width="7%" rowspan="2">Code</th>
+				<th width="7%" rowspan="2">Log</th>
+			{% if user.level >= 2 %}
+				<th width="1%" rowspan="2">Actions</th>
+			{% endif %}
+		</tr>
+		{% elseif user.level == 0 and user.selected_assignment.forever != 1 %}
+			<th width="23%" rowspan="2">Problem</th>
+			<th width="17%" rowspan="2">Submit Time</th>
+			<th width="7%" colspan="3">Score</th>
+			<th width="1%" rowspan="2">Language</th>
+			<th width="10%" rowspan="2">Status</th>
+			<th width="15%" rowspan="2">Code</th>
+		</tr>
+		<tr>
+			<th width="7%" class="score">Score</th>
+			<th width="7%" class="score">Delay<br>%</th>
+			<th width="7%" class="score">Final Score</th>
+		</tr>
+		{% else %}
+			<th width="23%" rowspan="2">Problem</th>
+			<th width="17%" rowspan="2">Submit Time</th>
+			{# <th width="7%" rowspan="2">Score</th> #}
+			<th width="1%" rowspan="2">Language</th>
+			<th width="10%" rowspan="2">Status</th>
+			<th width="10%" rowspan="2">Code</th>
+		</tr>
 		{% endif %}
 	</thead>
 	{% set i=0 %}
@@ -124,9 +150,10 @@
 		{% endif %}
 			<td><a href="{{ site_url('submissions/'~view~(filter_user?'/user/'~filter_user)~'/problem/'~submission.problem) }}">({{ submission.problem }}) {{ problems[submission.problem].name }}</a></td>
 			<td>{{ submission.time }}</td>
+			{% if user.selected_assignment.forever == 0 %}
 			<td>{{ submission.pre_score }}</td>
 			<td>
-				<span class="tiny_text" {{ submission.delay > 0 ? 'style="color:red;"' }}'>
+				<span class="tiny_text" {{ submission.delay > 0 ? 'style="color:red;"' }}>
 				{% if submission.delay <= 0 %}
 					No Delay
 				{% else %}
@@ -136,6 +163,7 @@
 				{{ submission.coefficient }}%
 			</td>
 			<td style="font-weight: bold;">{{ submission.final_score }} </td>
+			{% endif %}
 			<td>{{ submission.language }}</td>
 			<td class="status">
 				{% if submission.status == 'Uploaded' %}

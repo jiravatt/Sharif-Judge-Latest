@@ -5,9 +5,9 @@
  #}
 {% set selected = 'editor' %}
 {% extends 'templates/base.twig' %}
-{% block icon %}fa-file-text{% endblock %}
-{% block title %}Code Editor{% endblock %}
-{% block head_title %}Code Editor{% endblock %}
+{% block icon %}fa-code{% endblock %}
+{% block title %}Code Submit{% endblock %}
+{% block head_title %}Code Submit{% endblock %}
 
 {% block other_assets %}
 <style>
@@ -16,7 +16,7 @@
     }
     
 	#code_div{
-	    height: 250px;
+	    height: 280px;
 		display: block;
 	}
 </style>
@@ -35,15 +35,93 @@
 		});
 	});
 </script>
+<script src="{{ base_url("/assets/ace_editor/ace.js") }}" type="text/javascript" charset="utf-8"></script>
+<script src="{{ base_url("/assets/ace_editor/ext-language_tools.js") }}"></script>
+
+<script>
+$(document).ready(function(){
+	var editor = ace.edit("code_div");
+	var textarea = $('#content');
+	ace.config.loadModule("ace/ext/language_tools", function() {
+		editor.setOptions({
+			mode: "ace/mode/text",
+			fontSize: 15,
+			showPrintMargin: false,
+			enableSnippets: true,
+			enableBasicAutocompletion: true,
+			enableLiveAutocompletion: true
+		});
+	});
+	
+	
+	$("#languages").change( function() {
+		var lang_id = $("#languages").val();
+		switch (lang_id)
+		{
+			case "C":
+				editor.session.setMode("ace/mode/c_cpp");
+				var lang = 'c';
+				break;
+			case "C++":
+				editor.session.setMode("ace/mode/c_cpp");
+				var lang = 'cpp';
+				break;
+			case "Python 3":
+				editor.session.setMode("ace/mode/python");
+				var lang = 'py';
+				break;
+			case "Python 2":
+				editor.session.setMode("ace/mode/python");
+				var lang = 'py2';
+				break;
+			case "Java":
+				editor.session.setMode("ace/mode/java");
+				var lang = 'java'
+				break;
+			default:
+				editor.session.setMode('ace/mode/text');
+				var lang = '';
+				break;
+		}
+
+		if (lang != '')
+		{
+			var obj = $.ajax({
+				type: 'POST',
+				url: shj.site_url + 'submit/template',
+				data: {
+					assignment: {{ user.selected_assignment.id }},
+					problem: $("#problems").val(),
+					language: lang,
+					shj_csrf_token: shj.csrf_token
+				},
+				success: function (response) {
+					if (response.done && response.data != null) {
+						editor.session.setValue(response.data);
+					}
+				},
+				error: function(XMLHttpRequest, textStatus, errorThrown) { 
+					alert("Status: " + textStatus + " Error: " + errorThrown); 
+				}
+			});					
+		}
+	});
+	//$("#languages").change();
+	
+	editor.getSession().on('change', function () {
+		textarea.val(editor.getSession().getValue());
+	});
+
+	textarea.val(editor.getSession().getValue());
+
+});
+</script>
 {% endblock %}
-
-
 
 {% block main_content %}
 {% if error != 'none' %}
 <p>{{ error }}</p>
 {% else %}
- {#   <p>a = {{ code_txt }}</p> #}
 	<p>Selected assignment: <span dir="auto">{{ user.selected_assignment.name }}</span></p>
 	<p>Coefficient: {{ coefficient }}%</p>
 	{{ form_open_multipart('submit/editor') }}
@@ -79,52 +157,6 @@
 	
 	
 	</form>
-	
-    	<script src="/assets/ace_editor/ace.js" type="text/javascript" charset="utf-8"></script>
-    	
-    	<script>
-    	$(document).ready(function(){
-            var editor = ace.edit("code_div");
-            var textarea = $('#content');
-            editor.setOption("fontSize", 13);
-	        editor.setShowPrintMargin(false);
-	        editor.getSession().setUseSoftTabs(false);
-//            editor.setTheme("ace/theme/chrome");
-            editor.session.setMode("ace/mode/text");
-            
-            $(document).on('change', "#languages", function(){
-		        var lang_id = $("#languages").val();
-		        if (lang_id != 0) {
-		            switch (lang_id)
-		            {
-		                case "C":
-		                    editor.session.setMode("ace/mode/c_cpp");
-		                    break;
-		                case "C++":
-		                    editor.session.setMode("ace/mode/c_cpp");
-		                    break;
-		                case "Python 3":
-		                    editor.session.setMode("ace/mode/python");
-		                    break;
-		                case "Java":
-		                    editor.session.setMode("ace/mode/java");
-		                    break;
-		            }
-		        } else {
-			        editor.session.setMode('ace/mode/text');
-		        }
-	        });
-            $("#languages").change();
-            
-            editor.getSession().on('change', function () {
-                textarea.val(editor.getSession().getValue());
-            });
-
-            textarea.val(editor.getSession().getValue());
-       
-        });
-        </script>
-
 	
 {% endif %}
 {% endblock %}  {# main_content #}

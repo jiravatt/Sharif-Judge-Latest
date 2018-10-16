@@ -198,7 +198,19 @@ COMPILE_BEGIN_TIME=$(($(date +%s%N)/1000000));
 
 if [ "$EXT" = "java" ]; then
 	cp ../java.policy java.policy
-	cp $PROBLEMPATH/$UN/$FILENAME.java $MAINFILENAME.java
+	# If precode.java exists, add user's code into it
+	if [ -f "$PROBLEMPATH/precode.java" ]; then
+		cp $PROBLEMPATH/precode.java $MAINFILENAME.java
+		cat $PROBLEMPATH/$UN/$FILENAME.java >> $MAINFILENAME.java
+		shj_log "precode.java found! User's code has been appended into it."
+	else
+		cp $PROBLEMPATH/$UN/$FILENAME.java $MAINFILENAME.java
+	fi
+	# If postcode.java exists, append into user's written code
+	if [ -f "$PROBLEMPATH/postcode.java" ]; then
+		cat $PROBLEMPATH/postcode.java >> $MAINFILENAME.java
+		shj_log "postcode.java found! It has been appended into user's code."
+	fi
 	shj_log "Compiling as Java"
 	javac $MAINFILENAME.java >/dev/null 2>cerr
 	EXITCODE=$?
@@ -226,6 +238,19 @@ fi
 ########################################################################################################
 
 if [ "$EXT" = "py2" ]; then
+	# If precode.py2 exists, add user's code into it
+	if [ -f "$PROBLEMPATH/precode.py2" ]; then
+		cp $PROBLEMPATH/precode.py2 $FILENAME.py
+		cat $PROBLEMPATH/$UN/$FILENAME.py >> $FILENAME.py
+		shj_log "precode.py2 found! User's code has been appended into it."
+	else
+		cp $PROBLEMPATH/$UN/$FILENAME.py $FILENAME.py
+	fi
+	# If postcode.py2 exists, append into user's written code
+	if [ -f "$PROBLEMPATH/postcode.py2" ]; then
+		cat $PROBLEMPATH/postcode.py2 >> $FILENAME.py
+		shj_log "postcode.py2 found! It has been appended into user's code."
+	fi
 	cp $PROBLEMPATH/$UN/$FILENAME.py $FILENAME.py
 	shj_log "Checking Python Syntax"
 	python2 -O -m py_compile $FILENAME.py >/dev/null 2>cerr
@@ -257,11 +282,18 @@ fi
 ########################################################################################################
 
 if [ "$EXT" = "py3" ]; then
-	cp $PROBLEMPATH/$UN/$FILENAME.py $FILENAME.py
-	# If mainprog.py exists, append into user's written code
-	if [ -f "$PROBLEMPATH/mainprog.py" ]; then
-		shj_log "mainprog.py found! It has been appended into user's code."
-		cat $PROBLEMPATH/mainprog.py >> $FILENAME.py
+	# If precode.py exists, add user's code into it
+	if [ -f "$PROBLEMPATH/precode.py" ]; then
+		cp $PROBLEMPATH/precode.py $FILENAME.py
+		cat $PROBLEMPATH/$UN/$FILENAME.py >> $FILENAME.py
+		shj_log "precode.py found! User's code has been appended into it."
+	else
+		cp $PROBLEMPATH/$UN/$FILENAME.py $FILENAME.py
+	fi
+	# If postcode.py exists, append into user's written code
+	if [ -f "$PROBLEMPATH/postcode.py" ]; then
+		cat $PROBLEMPATH/postcode.py >> $FILENAME.py
+		shj_log "postcode.py found! It has been appended into user's code."
 	fi
 	shj_log "Checking Python Syntax"
 	python3 -O -m py_compile $FILENAME.py >/dev/null 2>cerr
@@ -299,18 +331,32 @@ if [ "$EXT" = "c" ] || [ "$EXT" = "cpp" ]; then
 		C_OPTIONS="$C_OPTIONS -std=c++14" # Use C++ 2014 Standard
 	fi
 	EXEFILE="s_$(echo $FILENAME | sed 's/[^a-zA-Z0-9]//g')" # Name of executable file
-	# If mainprog.c or mainprog.cpp exists, copy it to code.c and append content of user's written code
+	# If precode.* or postcode.* exists, copy it to code.c and append content of user's written code
 	# or function to code.c
-	if [ "$EXT" = "c" ] && [ -f "$PROBLEMPATH/mainprog.c" ]; then
-		shj_log "mainprog.c found! user's code has been appended."
-		cp $PROBLEMPATH/mainprog.c code.c
-		cat $PROBLEMPATH/$UN/$FILENAME.$EXT >> code.c
-	elif [ "$EXT" = "cpp" ] && [ -f "$PROBLEMPATH/mainprog.cpp" ]; then
-		shj_log "mainprog.cpp found! user's code has been appended."
-		cp $PROBLEMPATH/mainprog.cpp code.c
-		cat $PROBLEMPATH/$UN/$FILENAME.$EXT >> code.c
+	if [ "$EXT" = "c" ]; then
+		if [ -f "$PROBLEMPATH/precode.c" ]; then
+			cp $PROBLEMPATH/precode.c code.c
+			cat $PROBLEMPATH/$UN/$FILENAME.$EXT >> code.c
+			shj_log "precode.c found! User's code has been appended into it."
+		else
+			cp $PROBLEMPATH/$UN/$FILENAME.$EXT code.c
+		fi
+		if [ -f "$PROBLEMPATH/postcode.c" ]; then
+			cat $PROBLEMPATH/postcode.c >> code.c
+			shj_log "postcode.c found! It has been appended into user's code."
+		fi
 	else
-		cp $PROBLEMPATH/$UN/$FILENAME.$EXT code.c
+		if [ -f "$PROBLEMPATH/precode.cpp" ]; then
+			cp $PROBLEMPATH/precode.cpp code.c
+			cat $PROBLEMPATH/$UN/$FILENAME.$EXT >> code.c
+			shj_log "precode.cpp found! User's code has been appended into it."
+		else
+			cp $PROBLEMPATH/$UN/$FILENAME.$EXT code.c
+		fi
+		if [ -f "$PROBLEMPATH/postcode.cpp" ]; then
+			cat $PROBLEMPATH/postcode.cpp >> code.c
+			shj_log "postcode.cpp found! It has been appended into user's code."
+		fi
 	fi
 	shj_log "Compiling as $EXT"
 	if $SANDBOX_ON; then
@@ -423,7 +469,8 @@ PASSEDTESTS=0
 
 for((i=1;i<=TST;i++)); do
 	shj_log "\n=== TEST $i ==="
-	echo "<span class=\"shj_b\">Test $i</span>" >>$PROBLEMPATH/$UN/result.html
+#	echo "<span class=\"shj_b\">Test $i</span>" >>$PROBLEMPATH/$UN/result.html
+	RESULT_TXT="<span class=\"shj_b\">Test $i</span>: "
 	
 	touch err
 	
@@ -436,7 +483,9 @@ for((i=1;i<=TST;i++)); do
 		EXITCODE=$?
 		if grep -iq -m 1 "Too small initial heap" out || grep -q -m 1 "java.lang.OutOfMemoryError" err; then
 			shj_log "Memory Limit Exceeded"
-			echo "<span class=\"shj_o\">Memory Limit Exceeded</span>" >>$PROBLEMPATH/$UN/result.html
+		#	echo "<span class=\"shj_o\">Memory Limit Exceeded</span>" >>$PROBLEMPATH/$UN/result.html
+			RESULT_TXT="${RESULT_TXT}<span class=\"shj_o\">Memory Limit Exceeded</span>"
+			echo $RESULT_TXT >>$PROBLEMPATH/$UN/result.html
 			continue
 		fi
 		if grep -q -m 1 "Exception in" err; then # show Exception
@@ -445,10 +494,13 @@ for((i=1;i<=TST;i++)); do
 			shj_log "Exception: $javaexceptionname\nMaybe at:$javaexceptionplace"
 			# if DISPLAY_JAVA_EXCEPTION_ON is true and the exception is in the trusted list, we show the exception name
 			if $DISPLAY_JAVA_EXCEPTION_ON && grep -q -m 1 "^$javaexceptionname\$" ../java_exceptions_list; then
-				echo "<span class=\"shj_o\">Runtime Error ($javaexceptionname)</span>" >>$PROBLEMPATH/$UN/result.html
+			#	echo "<span class=\"shj_o\">Runtime Error ($javaexceptionname)</span>" >>$PROBLEMPATH/$UN/result.html
+				RESULT_TXT="${RESULT_TXT}<span class=\"shj_o\">Runtime Error ($javaexceptionname)</span>"
 			else
-				echo "<span class=\"shj_o\">Runtime Error</span>" >>$PROBLEMPATH/$UN/result.html
+			#	echo "<span class=\"shj_o\">Runtime Error</span>" >>$PROBLEMPATH/$UN/result.html
+				RESULT_TXT="${RESULT_TXT}<span class=\"shj_o\">Runtime Error</span>"
 			fi
+			echo $RESULT_TXT >>$PROBLEMPATH/$UN/result.html
 			continue
 		fi
 	elif [ "$EXT" = "c" ] || [ "$EXT" = "cpp" ]; then
@@ -502,23 +554,33 @@ for((i=1;i<=TST;i++)); do
 		if grep -q "SHJ_TIME" err; then
 			t=`grep "SHJ_TIME" err|cut -d" " -f3`
 			shj_log "Time Limit Exceeded ($t s)"
-			echo "<span class=\"shj_o\">Time Limit Exceeded</span>" >>$PROBLEMPATH/$UN/result.html
+		#	echo "<span class=\"shj_o\">Time Limit Exceeded</span>" >>$PROBLEMPATH/$UN/result.html
+			RESULT_TXT="${RESULT_TXT}<span class=\"shj_o\">Time Limit Exceeded</span>"
+			echo $RESULT_TXT >>$PROBLEMPATH/$UN/result.html
 			continue
 		elif grep -q "SHJ_MEM" err; then
 			shj_log "Memory Limit Exceeded"
-			echo "<span class=\"shj_o\">Memory Limit Exceeded</span>" >>$PROBLEMPATH/$UN/result.html
+		#	echo "<span class=\"shj_o\">Memory Limit Exceeded</span>" >>$PROBLEMPATH/$UN/result.html
+			RESULT_TXT="${RESULT_TXT}<span class=\"shj_o\">Memory Limit Exceeded</span>"
+			echo $RESULT_TXT >>$PROBLEMPATH/$UN/result.html
 			continue
 		elif grep -q "SHJ_HANGUP" err; then
 			shj_log "Hang Up"
-			echo "<span class=\"shj_o\">Process hanged up</span>" >>$PROBLEMPATH/$UN/result.html
+		#	echo "<span class=\"shj_o\">Process hanged up</span>" >>$PROBLEMPATH/$UN/result.html
+			RESULT_TXT="${RESULT_TXT}<span class=\"shj_o\">Process hanged up</span>"
+			echo $RESULT_TXT >>$PROBLEMPATH/$UN/result.html
 			continue
 		elif grep -q "SHJ_SIGNAL" err; then
 			shj_log "Killed by a signal"
-			echo "<span class=\"shj_o\">Killed by a signal</span>" >>$PROBLEMPATH/$UN/result.html
+		#	echo "<span class=\"shj_o\">Killed by a signal</span>" >>$PROBLEMPATH/$UN/result.html
+			RESULT_TXT="${RESULT_TXT}<span class=\"shj_o\">Killed by a signal</span>"
+			echo $RESULT_TXT >>$PROBLEMPATH/$UN/result.html
 			continue
 		elif grep -q "SHJ_OUTSIZE" err; then
 			shj_log "Output Size Limit Exceeded"
-			echo "<span class=\"shj_o\">Output Size Limit Exceeded</span>" >>$PROBLEMPATH/$UN/result.html
+		#	echo "<span class=\"shj_o\">Output Size Limit Exceeded</span>" >>$PROBLEMPATH/$UN/result.html
+			RESULT_TXT="${RESULT_TXT}<span class=\"shj_o\">Output Size Limit Exceeded</span>"
+			echo $RESULT_TXT >>$PROBLEMPATH/$UN/result.html
 			continue
 		fi
 	else
@@ -530,14 +592,18 @@ for((i=1;i<=TST;i++)); do
 		#shj_log "Time Limit Exceeded (Exit code=$EXITCODE)"
 		#echo "<span style='color: orange;'>Time Limit Exceeded</span>" >>$PROBLEMPATH/$UN/result.html
 		shj_log "Killed"
-		echo "<span class=\"shj_o\">Killed</span>" >>$PROBLEMPATH/$UN/result.html
+	#	echo "<span class=\"shj_o\">Killed</span>" >>$PROBLEMPATH/$UN/result.html
+		RESULT_TXT="${RESULT_TXT}<span class=\"shj_o\">Killed</span>"
+		echo $RESULT_TXT >>$PROBLEMPATH/$UN/result.html
 		continue
 	fi
 
 
 	if [ $EXITCODE -ne 0 ]; then
 		shj_log "Runtime Error"
-		echo "<span class=\"shj_o\">Runtime Error</span>" >>$PROBLEMPATH/$UN/result.html
+	#	echo "<span class=\"shj_o\">Runtime Error</span>" >>$PROBLEMPATH/$UN/result.html
+		RESULT_TXT="${RESULT_TXT}<span class=\"shj_o\">Runtime Error</span>"
+		echo $RESULT_TXT >>$PROBLEMPATH/$UN/result.html
 		continue
 	fi
 	
@@ -571,12 +637,15 @@ for((i=1;i<=TST;i++)); do
 
 	if $ACCEPTED; then
 		shj_log "ACCEPTED"
-		echo "<span class=\"shj_g\">ACCEPT</span>" >>$PROBLEMPATH/$UN/result.html
+	#	echo "<span class=\"shj_g\">ACCEPT</span>" >>$PROBLEMPATH/$UN/result.html
+		RESULT_TXT="${RESULT_TXT}<span class=\"shj_g\">ACCEPT</span>"
 		((PASSEDTESTS=PASSEDTESTS+1))
 	else
 		shj_log "WRONG"
-		echo "<span class=\"shj_r\">WRONG</span>" >>$PROBLEMPATH/$UN/result.html
+	#	echo "<span class=\"shj_r\">WRONG</span>" >>$PROBLEMPATH/$UN/result.html
+		RESULT_TXT="${RESULT_TXT}<span class=\"shj_r\">WRONG</span>"
 	fi
+	echo $RESULT_TXT >>$PROBLEMPATH/$UN/result.html
 done
 
 

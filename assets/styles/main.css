@@ -417,6 +417,7 @@ div#extra_time i {
 .color-final_submissions {border-color: #22478A!important;}
 .color-all_submissions {border-color: #543680!important;}
 .color-scoreboard {border-color: #991B4A!important;}
+.color-help {border-color: #439427!important;}
 
 .color-dashboard.selected i {background-color: #C52E26!important;border-color: #C52E26!important;}
 .color-settings.selected i {background-color: #EE3A23!important;border-color: #EE3A23!important;}
@@ -429,7 +430,7 @@ div#extra_time i {
 .color-final_submissions.selected i {background-color: #22478A!important;border-color: #22478A!important;}
 .color-all_submissions.selected i {background-color: #543680!important;border-color: #543680!important;}
 .color-scoreboard.selected i {background-color: #991B4A!important;border-color: #991B4A!important;}
-
+.color-help.selected i {background-color: #439427!important;border-color: #439247!important;}
 div#side_bar {
 	color:#595959;
 	position: fixed;
@@ -830,6 +831,111 @@ select.sharif_time {
 }
 
 .sharif_table th.score {
+	border-radius: 0;
+	border-top: 1px solid #AFAFAF;
+	border-left: 1px solid #AFAFAF;
+}
+
+/* For a table in problems page */
+.problem_table {
+	*border-collapse: collapse; /* IE7 and lower */
+	border-spacing: 0;
+	width: 100%;
+	border: solid #ccc 1px;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	border-radius: 6px;
+	-webkit-box-shadow: 0 1px 1px #ccc;
+	-moz-box-shadow: 0 1px 1px #ccc;
+	box-shadow: 0 1px 1px #ccc;
+}
+
+.problem_table tr.hl {
+	background-color: #ffff88;
+	font-weight: bold;
+}
+
+.problem_table tr.completed {
+	background-color: #b8ffa6;
+}
+
+.problem_table tr.incompleted {
+	background-color: #ffb5b5;
+}
+
+.problem_table tr {
+	background-color: #fcfcfc;
+}
+
+.problem_table tr:hover {
+	background-color: #f0f0f0;
+}
+
+.problem_table td, .problem_table th {
+	border-left: 1px solid #AFAFAF;
+	border-top: 1px solid #AFAFAF;
+	padding: 3px 5px;
+	text-align: center;
+}
+
+.problem_table td {
+	height: 42px;
+}
+
+.rank td, .rank th {
+	padding: 2px;
+}
+
+.problem_table th {
+	background-color: #dce9f9;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#ebf3fc), to(#dce9f9));
+	background-image: -webkit-linear-gradient(top, #ebf3fc, #dce9f9);
+	background-image: -moz-linear-gradient(top, #ebf3fc, #dce9f9);
+	background-image: -ms-linear-gradient(top, #ebf3fc, #dce9f9);
+	background-image: -o-linear-gradient(top, #ebf3fc, #dce9f9);
+	background-image: linear-gradient(top, #ebf3fc, #dce9f9);
+	-webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset;
+	-moz-box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset;
+	box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset;
+	border-top: none;
+	text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+}
+
+.problem_table td:first-child, .problem_table th:first-child {
+	border-left: none;
+}
+
+.problem_table th:first-child {
+	-moz-border-radius: 6px 0 0 0;
+	-webkit-border-radius: 6px 0 0 0;
+	border-radius: 6px 0 0 0;
+}
+
+.problem_table th:last-child {
+	-moz-border-radius: 0 6px 0 0;
+	-webkit-border-radius: 0 6px 0 0;
+	border-radius: 0 6px 0 0;
+}
+
+.problem_table th:only-child {
+	-moz-border-radius: 6px 6px 0 0;
+	-webkit-border-radius: 6px 6px 0 0;
+	border-radius: 6px 6px 0 0;
+}
+
+.problem_table tr:last-child td:first-child {
+	-moz-border-radius: 0 0 0 6px;
+	-webkit-border-radius: 0 0 0 6px;
+	border-radius: 0 0 0 6px;
+}
+
+.problem_table tr:last-child td:last-child {
+	-moz-border-radius: 0 0 6px 0;
+	-webkit-border-radius: 0 0 6px 0;
+	border-radius: 0 0 6px 0;
+}
+
+.problem_table th.score {
 	border-radius: 0;
 	border-top: 1px solid #AFAFAF;
 	border-left: 1px solid #AFAFAF;
@@ -1307,6 +1413,17 @@ div#main_container .problem_description {
 }
 
 .problem_description pre {
+	font-size: 12px;
+	line-height: normal;
+}
+
+div#main_container .help_description {
+	text-align: justify;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.help_description pre {
 	font-size: 12px;
 	line-height: normal;
 }

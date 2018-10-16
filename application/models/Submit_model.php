@@ -167,6 +167,40 @@ class Submit_model extends CI_Model {
 		$this->db->insert('submissions', $submit_info);
 
 	}
+	
+	// ------------------------------------------------------------------------
 
+	/*
+	 * list of all problems with final pre_score
+	 */
+	public function all_problems_score($assignment_id, $level = 0, $view_all = false)
+	{
+		// Get all problem list from all_problems in assignment_model
+		$list_all_problems = $this->assignment_model->all_problems($assignment_id, $level, $view_all);
+
+		// Get final submissions from get_final_submissions
+		// $all_final_submissions = get_final_submissions($assignment_id, $level, $this->user->username);
+
+		foreach ($list_all_problems as &$problem)
+		{
+			$arr = array('assignment' => $assignment_id,
+				'is_final' => 1,
+				'problem' => $problem['id'],
+				'username' => $this->user->username,
+			);
+			$result_numrow = $this->db->where($arr)->count_all_results('submissions');
+			if ($result_numrow > 0)
+			{
+				$result_row = $this->db->get_where('submissions', $arr)->row();
+				$pre_score = $result_row->pre_score;
+				$problem['pre_score'] = $pre_score;
+				$problem['final_score'] = ceil($pre_score / 10000 * $problem['score']);
+			}
+			else
+				$problem['pre_score'] = -1;
+		}
+
+		return $list_all_problems;
+	}
 
 }

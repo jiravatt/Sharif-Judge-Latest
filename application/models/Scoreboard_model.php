@@ -146,7 +146,7 @@ class Scoreboard_model extends CI_Model
 		foreach($all_problems as $i)
 			$total_score += $i['score'];
 		$data = array(
-			'assignment_id' => $assignment_id,
+			'assignment' => $assignment,
 			'problems' => $all_problems,
 			'total_score' => $total_score,
 			'scores' => $scores,

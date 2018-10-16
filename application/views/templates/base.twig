@@ -38,7 +38,11 @@ shj.base_url = '{{ rtrim(base_url(),'/')|e('js') }}/';
 shj.csrf_token = $.cookie('shjcsrftoken');
 shj.offset = moment('{{ shj_now_str() }}').diff(moment());
 shj.time = moment();
-shj.finish_time = moment("{{ user.selected_assignment.finish_time|raw }}");
+{% if user.selected_assignment.finish_time is null %}
+	shj.finish_time = null;
+{% else %}
+	shj.finish_time = moment("{{ user.selected_assignment.finish_time|raw }}");
+{% endif %}
 shj.extra_time = moment.duration({{ user.selected_assignment.extra_time|raw }}, 'seconds');
 // notifications
 shj.check_for_notifications = false;

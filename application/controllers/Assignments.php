@@ -43,16 +43,22 @@ class Assignments extends CI_Controller
 
 		foreach ($data['all_assignments'] as &$item)
 		{
-			$extra_time = $item['extra_time'];
-			$delay = shj_now()-strtotime($item['finish_time']);;
-			ob_start();
-			if ( eval($item['late_rule']) === FALSE )
-				$coefficient = "error";
-			if (!isset($coefficient))
-				$coefficient = "error";
-			ob_end_clean();
-			$item['coefficient'] = $coefficient;
-			$item['finished'] = ($delay > $extra_time);
+			if ($item['forever'] == 0)
+			{
+				$extra_time = $item['extra_time'];
+				$delay = shj_now()-strtotime($item['finish_time']);;
+				ob_start();
+				if ( eval($item['late_rule']) === FALSE )
+					$coefficient = "error";
+				if (!isset($coefficient))
+					$coefficient = "error";
+				ob_end_clean();
+				$item['coefficient'] = $coefficient;
+				$item['finished'] = ($delay > $extra_time);
+			} else {
+				$item['finish_time'] = '-';
+				$item['coefficient'] = '100';
+			}
 			
 			// LEVEL mode
 			if ( $item['level_mode'] == 1 && $this->user->level == 0 )
@@ -151,43 +157,40 @@ class Assignments extends CI_Controller
 
 		for ($i=1 ; $i<=$number_of_problems ; $i++)
 		{
-
+			// Add testcase input folder into zip file
 			$path = "$root_path/p{$i}/in";
-			$this->zip->read_dir($path, FALSE, $root_path);
-
-			$path = "$root_path/p{$i}/out";
-			$this->zip->read_dir($path, FALSE, $root_path);
-
-			$path = "$root_path/p{$i}/tester.cpp";
 			if (file_exists($path))
+				$this->zip->read_dir($path, FALSE, $root_path);
+
+			// Add testcase output folder into zip file
+			$path = "$root_path/p{$i}/out";
+			if (file_exists($path))
+				$this->zip->read_dir($path, FALSE, $root_path);
+
+			// Add tester src into zip file
+			$path = "$root_path/p{$i}/tester.cpp";
+			if ( ! empty(glob($path)) )
 				$this->zip->add_data("p{$i}/tester.cpp", file_get_contents($path));
 			
-			// Add mainprog.* into a zip file
-			$path = "$root_path/p{$i}/mainprog.cpp"; 
-			if (file_exists($path))
-				$this->zip->add_data("p{$i}/mainprog.cpp", file_get_contents($path));
-			
-			$path = "$root_path/p{$i}/mainprog.c";
-			if (file_exists($path))
-				$this->zip->add_data("p{$i}/mainprog.c", file_get_contents($path));
-			
-			$path = "$root_path/p{$i}/mainprog.py";
-			if (file_exists($path))
-				$this->zip->add_data("p{$i}/mainprog.py", file_get_contents($path));
+			// Add precode.* into zip file
+			$pre_files = glob("$root_path/p{$i}/precode.*");
+			if ( ! empty($pre_files) )
+				foreach ($pre_files as $pre_file)
+					$this->zip->add_data("p{$i}/".shj_basename($pre_file), file_get_contents($pre_file));
 
-			// Add mainprog.* into a zip file
-			$path = "$root_path/p{$i}/mainprog.cpp"; 
-			if (file_exists($path))
-				$this->zip->add_data("p{$i}/mainprog.cpp", file_get_contents($path));
+			// Add postcode.* into zip file
+			$post_files = glob("$root_path/p{$i}/postcode.*");
+			if ( ! empty($post_files) )
+				foreach ($post_files as $post_file)
+					$this->zip->add_data("p{$i}/".shj_basename($post_file), file_get_contents($post_file));
 			
-			$path = "$root_path/p{$i}/mainprog.c";
-			if (file_exists($path))
-				$this->zip->add_data("p{$i}/mainprog.c", file_get_contents($path));
-			
-			$path = "$root_path/p{$i}/mainprog.py";
-			if (file_exists($path))
-				$this->zip->add_data("p{$i}/mainprog.py", file_get_contents($path));
+			// Add template.* into zip file
+			$template_files = glob("$root_path/p{$i}/template.*");
+			if ( ! empty($template_files) )
+				foreach ($template_files as $template_file)
+					$this->zip->add_data("p{$i}/".shj_basename($template_file), file_get_contents($template_file));
 
+			// Add problem's pdf file into zip file
 			$pdf_files = glob("$root_path/p{$i}/*.pdf");
 			if ($pdf_files)
 			{
@@ -195,10 +198,12 @@ class Assignments extends CI_Controller
 				$this->zip->add_data("p{$i}/".shj_basename($path), file_get_contents($path));
 			}
 
+			// Add problem's description (html) into zip file
 			$path = "$root_path/p{$i}/desc.html";
 			if (file_exists($path))
 				$this->zip->add_data("p{$i}/desc.html", file_get_contents($path));
-
+			
+			// Add problem's description (md) into zip file
 			$path = "$root_path/p{$i}/desc.md";
 			if (file_exists($path))
 				$this->zip->add_data("p{$i}/desc.md", file_get_contents($path));
@@ -328,7 +333,9 @@ class Assignments extends CI_Controller
 			$data['edit_assignment'] = $this->assignment_model->assignment_info($this->edit_assignment);
 			if ($data['edit_assignment']['id'] === 0)
 				show_404();
-			$data['problems'] = $this->assignment_model->all_problems($this->edit_assignment, true);
+			else if ($data['edit_assignment']['late_rule'] === NULL)
+				$data['edit_assignment']['late_rule'] = $this->settings_model->get_setting('default_late_rule');
+			$data['problems'] = $this->assignment_model->all_problems($this->edit_assignment, 0, true);
 		}
 		else
 		{
@@ -405,10 +412,14 @@ class Assignments extends CI_Controller
 
 		$this->form_validation->set_rules('assignment_name', 'assignment name', 'required|max_length[50]');
 		$this->form_validation->set_rules('start_time', 'start time', 'required');
-		$this->form_validation->set_rules('finish_time', 'finish time', 'required');
-		$this->form_validation->set_rules('extra_time', 'extra time', 'required');
+		if ($this->input->post('forever') == 0)
+		{
+			$this->form_validation->set_rules('finish_time', 'finish time', 'required');
+			$this->form_validation->set_rules('late_rule', 'coefficient rule', 'required');
+			$this->form_validation->set_rules('extra_time', 'extra time', 'required');
+		}
+		
 		$this->form_validation->set_rules('participants', 'participants', '');
-		$this->form_validation->set_rules('late_rule', 'coefficient rule', 'required');
 		$this->form_validation->set_rules('name[]', 'problem name', 'required|max_length[50]');
 		$this->form_validation->set_rules('level[]', 'problem level', 'required|greater_than_equal_to[0]');
 		$this->form_validation->set_rules('score[]', 'problem score', 'required|integer');
@@ -530,7 +541,7 @@ class Assignments extends CI_Controller
 
 			// Extract new test cases and descriptions in temp directory
 			$this->load->library('unzip');
-			$this->unzip->allow(array('txt', 'cpp', 'html', 'md', 'pdf', 'py')); // To support mainprog.py
+			$this->unzip->allow(array('txt', 'cpp', 'html', 'md', 'pdf', 'py', 'py2', 'java', 'c')); // To support precode.*, postcode.*, template.*
 			$extract_result = $this->unzip->extract($u_data['full_path'], $tmp_dir);
 
 			// Remove the zip file
@@ -605,5 +616,5 @@ class Assignments extends CI_Controller
 	}
 
 
-
+	
 }

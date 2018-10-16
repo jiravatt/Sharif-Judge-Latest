@@ -34,7 +34,7 @@ class Problems extends CI_Controller
 	 * @param int $assignment_id
 	 * @param int $problem_id
 	 */
-	public function index($assignment_id = NULL, $problem_id = 1)
+	public function index($assignment_id = NULL, $problem_id = 0)
 	{
 
 		// If no assignment is given, use selected assignment
@@ -53,34 +53,31 @@ class Problems extends CI_Controller
 			'can_view' => TRUE,
 			'error_txt' => '',
 		);
-		
-		// LEVEL mode
-		if ($assignment['level_mode'] == 1 && $this->user->level < 2)
-		{
-		    $level = $this->assignment_model->get_current_level($assignment_id, $this->user->username);
-		    $data['user_problems'] = $this->assignment_model->all_problems($assignment_id, $level);
-		}
-		else
-		{
-		    $level = 0;
-		    $data['user_problems'] = $this->assignment_model->all_problems($assignment_id, 0, true);
-		}
 
 		$this->load->model('submit_model');
 		
 		// LEVEL mode
-		if ($assignment['level_mode'] == 1 && $this->user->level < 2)
+		if ($assignment['level_mode'] == 1 && $this->user->level == 0)
 		{
 		    $level = $this->assignment_model->get_current_level($assignment_id, $this->user->username);
-			$data['user_problems'] = $this->assignment_model->all_problems($assignment_id, $level);
-			// $data['user_problems'] = $this->submit_model->all_problems_score($assignment_id, $level);
+			$data['user_problems'] = $this->submit_model->all_problems_score($assignment_id, $level);
 		}
 		else
 		{
 		    $level = 0;
-			$data['user_problems'] = $this->assignment_model->all_problems($assignment_id, 0, true);
-			// $data['user_problems'] = $this->submit_model->all_problems_score($assignment_id, 0, true);
+			$data['user_problems'] = $this->submit_model->all_problems_score($assignment_id, 0, true);
 		}
+
+		// For student, set $problem_id to one of first problem they didn't complete
+		if ( $this->user->level == 0 && $problem_id == 0 )
+			foreach ($data['user_problems'] as $problem)
+			{
+				$problem_id = $problem['id'];
+				if ( $problem['pre_score'] != 10000)
+					break;
+			}
+		else if ( $problem_id == 0 )
+			$problem_id = 1;
 
 		if ( ! is_numeric($problem_id) || $problem_id < 1)
 			show_404();
@@ -93,24 +90,27 @@ class Problems extends CI_Controller
 			$data['can_view'] = FALSE;
 			$data['error_txt'] = 'Problem does not exist.';
 			$data['can_submit'] = FALSE;
-		} else if ( ($this->user->level < 2) && shj_now() < strtotime($assignment['start_time']) ) {
+		} else if ($this->user->level < 2 && shj_now() < strtotime($assignment['start_time']) ) {
 			if ( $assignment['hide_before_start'] == 1 )
 				$data['error_txt'] = 'Problem does not exist.';
 			else
 				$data['error_txt'] = 'Please wait until this assignment starts.';
 			$data['can_view'] = FALSE;
-			$data['can_submit'] = FALSE;
+			$data['can_submit'] = FALSE;		
 		} else if ( ($this->user->level == 0) && ! ($assignment['open']) ) {
 			$data['can_view'] = FALSE;
 			$data['error_txt'] = 'This assignment has been closed.';
 			$data['can_submit'] = FALSE;
-		} else if ( ($this->user->level == 0) && shj_now() > strtotime($assignment['finish_time'])+$assignment['extra_time'] ) {
-		    $data['can_submit'] = FALSE;
+		} else if ( $assignment['forever'] == 0 ) {
+			if (($this->user->level == 0) && shj_now() > strtotime($assignment['finish_time'])+$assignment['extra_time'] && $assignment['open'])
+			{
+				$data['can_submit'] = FALSE;
+			}
 		} else if ( $problem_id > $data['description_assignment']['problems'] ) {
 			$data['can_view'] = FALSE;
 			$data['error_txt'] = 'Problem does not exist.';
 			$data['can_submit'] = FALSE;
-		} else if ( ($this->user->level < 2) && $assignment['level_mode'] == 1 && $data['all_problems'][$problem_id]['level'] > $level) {
+		} else if ( ($this->user->level == 0) && $assignment['level_mode'] == 1 && $data['all_problems'][$problem_id]['level'] > $level) {
 		    $data['can_view'] = FALSE;
 			$data['error_txt'] = 'Problem does not exist.';
 			$data['can_submit'] = FALSE;

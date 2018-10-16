@@ -1,0 +1,25 @@
+{#
+ # Sharif Judge
+ # file: help.twig
+ # author: WYSIWYG <jiravatt.r@gmail.com>
+ #}
+{% set selected = 'help' %}
+{% extends 'templates/base.twig' %}
+{% block icon %}fa-question-circle{% endblock %}
+{% block title %}Help{% endblock %}
+{% block head_title %}Help{% endblock %}
+
+{% block other_assets %}
+{% endblock %}
+
+{% block title_menu %}
+{% if user.level >= 2 %}
+<span class="title_menu_item"><a href="{{ site_url("help/edit") }}"><i class="fa fa-pencil color2"></i> Edit</a></span>
+{% endif %}
+{% endblock %}
+
+{% block main_content %}
+<div class="help_description">
+    {{ help_txt|raw }}
+</div>
+{% endblock %}

@@ -19,4 +19,5 @@ tester/moss
 # Assignments folder
 assignments/*
 
-
+# figs folder
+figs/*

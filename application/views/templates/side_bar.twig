@@ -45,14 +45,14 @@
 		</li>
 		<li class="color-submit{{ selected=='submit' ? ' selected' }}">
 			<a href="{{ site_url('submit') }}">
-				<i class="fa fa-location-arrow fa-lg"></i>
+				<i class="fa fa-file-text fa-lg"></i>
 				<span class="sidebar_text">File Submit</span>
 			</a>
 		</li>
 		<li class="color-editor{{ selected=='editor' ? ' selected' }}">
 			<a href="{{ site_url('submit/editor') }}">
-				<i class="fa fa-file-text fa-lg"></i>
-				<span class="sidebar_text">Code Editor</span>
+				<i class="fa fa-code fa-lg"></i>
+				<span class="sidebar_text">Code Submit</span>
 			</a>
 		</li>
 		<li class="color-final_submissions{{ selected=='final_submissions' ? ' selected' }}">
@@ -71,6 +71,12 @@
 			<a href="{{ site_url('scoreboard') }}">
 				<i class="fa fa-star fa-lg"></i>
 				<span class="sidebar_text">Scoreboard</span>
+			</a>
+		</li>
+		<li class="color-help{{ selected=='help' ? ' selected' }}">
+			<a href="{{ site_url('help') }}">
+				<i class="fa fa-question-circle fa-lg"></i>
+				<span class="sidebar_text">Help</span>
 			</a>
 		</li>
 	</ul>

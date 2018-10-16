@@ -31,21 +31,35 @@ class Submit extends CI_Controller
 		$this->assignment_root = $this->settings_model->get_setting('assignments_root');
 
 		// LEVEL mode
-		$level = $this->assignment_model->get_current_level($this->user->selected_assignment['id'], $this->user->username);
-		if ($level == 0 || $this->user->level >= 2)
-		    $this->problems = $this->assignment_model->all_problems($this->user->selected_assignment['id'], 0, true);
+		if ($this->user->selected_assignment['level_mode'] == 1 && $this->user->level == 0)
+		{
+			$level = $this->assignment_model->get_current_level($this->user->selected_assignment['id'], $this->user->username);
+			$this->problems = $this->assignment_model->all_problems($this->user->selected_assignment['id'], $level);
+		}
 		else
-		    $this->problems = $this->assignment_model->all_problems($this->user->selected_assignment['id'], $level);
+		    $this->problems = $this->assignment_model->all_problems($this->user->selected_assignment['id'], 0, true);
 
-		$extra_time = $this->user->selected_assignment['extra_time'];
-		$delay = shj_now()-strtotime($this->user->selected_assignment['finish_time']);;
-		ob_start();
-		if ( eval($this->user->selected_assignment['late_rule']) === FALSE )
-			$coefficient = "error";
-		if (!isset($coefficient))
-			$coefficient = "error";
-		ob_end_clean();
+		    
+		if ($this->user->selected_assignment['forever'] == 0)
+		{
+			$extra_time = $this->user->selected_assignment['extra_time'];
+			$delay = shj_now()-strtotime($this->user->selected_assignment['finish_time']);
+			ob_start();
+			if ( eval($this->user->selected_assignment['late_rule']) === FALSE )
+				$coefficient = "error";
+			if (!isset($coefficient))
+				$coefficient = "error";
+			ob_end_clean();
+		}
+		else
+		{
+			$extra_time = 0;
+			$delay = 0;
+			$coefficient = 100;
+		}
+
 		$this->coefficient = $coefficient;
+		
 
 	}
 
@@ -170,15 +184,18 @@ class Submit extends CI_Controller
 		}
 		if ($this->user->selected_assignment['id'] == 0)
 			$this->data['error']='Please select an assignment first.';
-	    elseif ($this->user->level < 2 &&  ! $this->assignment_model->is_participant($this->user->selected_assignment['participants'],$this->user->username) )
+	    else if ($this->user->level < 2 &&  ! $this->assignment_model->is_participant($this->user->selected_assignment['participants'],$this->user->username) )
 			$this->data['error'] = 'You cannot submit this assignment right now.';
-		elseif ($this->user->level < 2 && shj_now() < strtotime($this->user->selected_assignment['start_time']))
+		else if ($this->user->level < 2 && shj_now() < strtotime($this->user->selected_assignment['start_time']))
 			$this->data['error'] = 'Selected assignment has not started.';
-		elseif ($this->user->level == 0 && ! $this->user->selected_assignment['open'])
+		else if ($this->user->level == 0 && ! $this->user->selected_assignment['open'])
 			$this->data['error'] = 'Selected assignment is closed.';
-		elseif ($this->user->level == 0 && shj_now() > strtotime($this->user->selected_assignment['finish_time'])+$this->user->selected_assignment['extra_time']) // deadline = finish_time + extra_time
-			$this->data['error'] = 'Selected assignment has finished.';
-		else
+		else if ($this->user->selected_assignment['forever'] == 0)
+			if ($this->user->level == 0 && shj_now() > strtotime($this->user->selected_assignment['finish_time'])+$this->user->selected_assignment['extra_time']) // deadline = finish_time + extra_time
+				$this->data['error'] = 'Selected assignment has finished.';
+			else
+				$this->data['error'] = 'none';
+		else //if ($this->user->selected_assignment['forever'] == 1)
 			$this->data['error'] = 'none';
 
 //		if ($this->user->level > 0)
@@ -188,7 +205,7 @@ class Submit extends CI_Controller
 		$this->twig->display('pages/submit.twig', $this->data);
         else if ($mode == 'editor')
         {
-            $this->data['code_txt'] = $code;
+            //$this->data['code_txt'] = $code;
             $this->twig->display('pages/editor.twig', $this->data);
         }
 
@@ -226,8 +243,11 @@ class Submit extends CI_Controller
 			show_error('Selected assignment has been closed.');
 		if ($this->user->level==0 && $now < strtotime($this->user->selected_assignment['start_time']))
 			show_error('Selected assignment has not started.');
-		if ($this->user->level==0 && $now > strtotime($this->user->selected_assignment['finish_time'])+$this->user->selected_assignment['extra_time'])
-			show_error('Selected assignment has finished.');
+		if ($this->user->selected_assignment['forever'] == 0)
+		{
+			if ($this->user->level==0 && $now > strtotime($this->user->selected_assignment['finish_time'])+$this->user->selected_assignment['extra_time'])
+				show_error('Selected assignment has finished.');
+		}
 		if ($this->user->level==0 &&  ! $this->assignment_model->is_participant($this->user->selected_assignment['participants'],$this->user->username) )
 			show_error('You are not registered for submitting.');
 		
@@ -317,6 +337,57 @@ class Submit extends CI_Controller
 		return TRUE;
 	}
 
+/**
+	 * Used by ajax request (for fetching content from template.*)
+	 */
+	public function template()
+	{		
+		 if ( ! $this->input->is_ajax_request() )
+		 	show_404();
+		
+		if (empty($_POST))
+			echo json_encode("NO POST!");
+
+		$this->form_validation->set_rules('assignment', 'Assignment ID', 'required|integer|greater_than[0]');
+		$this->form_validation->set_rules('problem', 'Problem', 'required|integer|greater_than[0]');
+		//$this->form_validation->set_rules('language', 'Language', 'required|in_list[c,cpp,py2,py,java]');
+
+		if ($this->form_validation->run())
+		{
+			$done = 0;
+
+			// GET vars
+			$assignment_id = $this->input->post('assignment');
+			$problem_id = $this->input->post('problem');
+			$language = $this->input->post('language');
+			$filename = 'template';
+
+			$assignments_root = rtrim($this->settings_model->get_setting('assignments_root'), '/');
+			$problem_dir = $assignments_root . '/assignment_' . $assignment_id . '/p' . $problem_id;
+			$full_path = $problem_dir . "/" . $filename . "." . $language;
+
+			if (file_exists($full_path))
+			{
+				$data = file_get_contents($full_path);
+				$done = 1;
+			}
+			else
+			{
+				$done = 1;
+				$data = NULL;
+			}
+				
+			$json_result = array(
+				'done' => $done,
+				'data' => $data,
+			);
+		}
+		else
+			$json_result = array('done' => 0, 'data' => 'Input Error');
+
+		$this->output->set_header('Content-Type: application/json; charset=utf-8');
+		echo json_encode($json_result);
+	}
 
 
 }
