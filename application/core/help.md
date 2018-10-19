@@ -11,7 +11,7 @@ When you logged in to the judge, this is the first page where you land on. It co
 ## Assignments
 Your instructor will assign some assignments to you. In each assignment, there are problems where you can work on and submit your code to this judge to see if your code works completely as your instructor expects or not.
 
-An _Assignments_ page lists all assignments that the instructor have assigned to you. To start working on the assignment, simply select a checkbox in front of the assignment's name to set it active and you can submit your code to all problems in that assignment from _Problems_, _File Submit_ and _Code Editor_ page.
+An _Assignments_ page lists all assignments that the instructor have assigned to you. To start working on the assignment, simply select a checkbox in front of the assignment's name to set it active and you can submit your code to all problems in that assignment from _Problems_, _File Submit_ and _Code Submit_ page.
 
 ___NOTE:___
 * You can also change an active assignment by choosing from a dropdown list in a top bar.
@@ -31,7 +31,7 @@ You can submit to any problems, that available to you, in active assignment by u
 
 If everything is fine, you will be automatically redirected to _All Submissions_ page to see a verdict of your submitted code.
 
-## Code Editor
+## Code Submit
 If file uploading is not your option, this page is created for you. You can type your code directly in an embedded editor and submit to a problem from this page.
 
 But first, select your target problem and desired language. In some problems, your instructor may provide you some draft code to start working on. Syntax highlighting for your selected language is also provided in the editor.
